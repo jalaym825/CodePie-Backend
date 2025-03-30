@@ -18,6 +18,12 @@ enum Role {
   ADMIN
 }
 
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
 model User {
   id         String  @id @default(uuid())
   email      String  @unique
@@ -53,7 +59,7 @@ model Participation {
   userId         String
   contestId      String
   joinedAt       DateTime @default(now())
-  totalScore     Int      @default(0)
+  totalScore     Float      @default(0)
   rank           Int?
   scoreUpdatedAt DateTime @default(now())
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -92,7 +98,8 @@ model TestCase {
   output      String
   explanation String?
   isHidden    Boolean          @default(false)
-  points      Int              @default(10)
+  points      Float              @default(0)
+  difficulty  Difficulty       @default(EASY)
   createdAt   DateTime         @default(now())
   problem     Problem          @relation(fields: [problemId], references: [id], onDelete: Cascade)
   results     TestCaseResult[]
@@ -105,7 +112,7 @@ model Submission {
   languageId        Int
   sourceCode        String
   status            SubmissionStatus @default(PENDING)
-  score             Int              @default(0)
+  score             Float              @default(0)
   compilationOutput String?
   executionTime     Int? // in milliseconds
   memoryUsed        Int? // in kilobytes

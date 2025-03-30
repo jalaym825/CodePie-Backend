@@ -34,6 +34,7 @@ async function processSubmission(submissionId, testCases) {
             testCases
         );
 
+        console.log(totalScore)
         // Update the submission with results
         await prisma.submission.update({
             where: { id: submissionId },

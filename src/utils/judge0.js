@@ -162,7 +162,6 @@ const processAllTestCases = async (submissionId, submission, testCases) => {
                 memoryLimit
             });
 
-            console.log(result);
 
             const testCaseResult = await prisma.testCaseResult.create({
                 data: {
