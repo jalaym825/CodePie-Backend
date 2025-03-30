@@ -1,3 +1,4 @@
+require("module-alias/register");
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -8,6 +9,7 @@ const errorMiddleware = require("./middlewares/errorMiddleware");
 const cookieParser = require("cookie-parser");
 const http = require("http");
 const { createSocketServer } = require('./socket');
+const prisma = require("./utils/prisma");
 
 dotenv.config();
 

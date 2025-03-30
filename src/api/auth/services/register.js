@@ -1,9 +1,9 @@
-const logger = require('../../../utils/logger');
-const prisma = require("../../../utils/prisma");
+const logger = require('@utils/logger');
+const prisma = require("@utils/prisma");
 const bcrypt = require("bcrypt");
-const ApiResponse = require("../../../entities/ApiResponse");
-const ApiError = require("../../../entities/ApiError");
-// const mailer = require("../../../utils/mailer");
+const ApiResponse = require("@entities/ApiResponse");
+const ApiError = require("@entities/ApiError");
+// const mailer = require("@utils/mailer");
 
 const register = async (req, res, next) => {
     try {
@@ -51,7 +51,7 @@ const register = async (req, res, next) => {
             }, { timeout: 10000 });
 
             delete newUser.password;
-            return res.json(new ApiResponse(200, "User created successfully", newUser));
+            return res.status(201).json(new ApiResponse("User created successfully", newUser));
         } catch (transactionError) {
             return next(new ApiError(400, transactionError.message, transactionError, "/auth/register"));
         }

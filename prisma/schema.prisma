@@ -15,11 +15,11 @@ datasource db {
 
 enum Role {
   USER
-  QUEST_MANAGER
+  ADMIN
 }
 
 model User {
-  id         Int     @id @default(autoincrement())
+  id         String  @id @default(uuid())
   email      String  @unique
   name       String
   password   String
@@ -31,5 +31,137 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  submissions    Submission[]
+  participations Participation[]
 }
 
+model Contest {
+  id             String          @id @default(uuid())
+  title          String
+  description    String
+  startTime      DateTime
+  endTime        DateTime
+  isVisible      Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  problems       Problem[]
+  participations Participation[]
+}
+
+model Participation {
+  id             String   @id @default(uuid())
+  userId         String
+  contestId      String
+  joinedAt       DateTime @default(now())
+  totalScore     Int      @default(0)
+  rank           Int?
+  scoreUpdatedAt DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contest        Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, contestId])
+}
+
+enum ProblemDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model Problem {
+  id              String            @id @default(uuid())
+  contestId       String
+  title           String
+  description     String
+  difficultyLevel ProblemDifficulty @default(EASY)
+  timeLimit       Int               @default(1000)
+  memoryLimit     Int               @default(256)
+  points          Int               @default(100)
+  isVisible       Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  contest         Contest           @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  testCases       TestCase[]
+  submissions     Submission[]
+}
+
+model TestCase {
+  id          String           @id @default(uuid())
+  problemId   String
+  input       String
+  output      String
+  explanation String?
+  isHidden    Boolean          @default(false)
+  points      Int              @default(10)
+  createdAt   DateTime         @default(now())
+  problem     Problem          @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  results     TestCaseResult[]
+}
+
+model Submission {
+  id                String           @id @default(uuid())
+  userId            String
+  problemId         String
+  languageId        Int
+  sourceCode        String
+  status            SubmissionStatus @default(PENDING)
+  score             Int              @default(0)
+  compilationOutput String?
+  executionTime     Int? // in milliseconds
+  memoryUsed        Int? // in kilobytes
+  submittedAt       DateTime         @default(now())
+  judgedAt          DateTime?
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem           Problem          @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  testCaseResults   TestCaseResult[]
+}
+
+enum SubmissionStatus {
+  PENDING
+  IN_QUEUE
+  PROCESSING
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  MEMORY_LIMIT_EXCEEDED
+  COMPILATION_ERROR
+  RUNTIME_ERROR
+  INTERNAL_ERROR
+}
+
+model TestCaseResult {
+  id            String         @id @default(uuid())
+  submissionId  String
+  testCaseId    String
+  status        TestCaseStatus
+  executionTime Int? // in milliseconds
+  memoryUsed    Int? // in kilobytes
+  stdout        String?
+  stderr        String?
+  passed        Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  submission    Submission     @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  testCase      TestCase       @relation(fields: [testCaseId], references: [id], onDelete: Cascade)
+
+  @@unique([submissionId, testCaseId])
+}
+
+enum TestCaseStatus {
+  IN_QUEUE
+  PROCESSING
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  COMPILATION_ERROR
+  INTERNAL_ERROR
+  EXEC_FORMAT_ERROR
+  MEMORY_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+}
+
+model Language {
+  id        Int     @id
+  name      String
+  extension String
+  isActive  Boolean @default(true)
+}

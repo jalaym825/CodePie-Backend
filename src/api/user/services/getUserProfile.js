@@ -1,6 +1,6 @@
-const { prisma } = require('../../../utils/prisma');
-const ApiResponse = require("../../../entities/ApiResponse");
-const ApiError = require("../../../entities/ApiError");
+const { prisma } = require('@utils/prisma');
+const ApiResponse = require("@entities/ApiResponse");
+const ApiError = require("@entities/ApiError");
 
 const getUserProfile = async (req, res, next) => {
     try {
@@ -19,7 +19,7 @@ const getUserProfile = async (req, res, next) => {
             },
         });
 
-        return res.json(new ApiResponse(200, "User profile fetched successfully", user));
+        return res.json(new ApiResponse("User profile fetched successfully", user));
     } catch (error) {
         return next(new ApiError(500, "Failed to fetch user profile", error, "/users/profile"));
     }

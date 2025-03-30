@@ -1,7 +1,6 @@
-const logger = require("../utils/logger");
-const {prisma} = require("../utils/prisma");
+const prisma = require("@utils/prisma");
 const jwt = require("jsonwebtoken");
-const ApiError = require("../entities/ApiError");
+const ApiError = require("@entities/ApiError");
 
 module.exports = isAuthenticated = async (req, res, next) => {
     const token = req.cookies?.token || req.header("Authorization")?.split(" ")[1];

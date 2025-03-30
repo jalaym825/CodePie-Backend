@@ -1,9 +1,9 @@
-const logger = require('../../../utils/logger');
-const {prisma} = require("../../../utils/prisma");
+const logger = require('@utils/logger');
+const prisma = require("@utils/prisma");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const ApiResponse = require("../../../entities/ApiResponse");
-const ApiError = require("../../../entities/ApiError");
+const ApiResponse = require("@entities/ApiResponse");
+const ApiError = require("@entities/ApiError");
 
 const login = async (req, res, next) => {
     try {
@@ -35,7 +35,7 @@ const login = async (req, res, next) => {
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
         });
 
-        return res.json(new ApiResponse(200, "User logged in successfully"));
+        return res.json(new ApiResponse("User logged in successfully", {}));
     } catch (err) {
         next(new ApiError(400, err.message, err, "/auth/login"));
     }

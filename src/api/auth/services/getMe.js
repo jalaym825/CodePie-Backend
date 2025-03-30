@@ -1,9 +1,9 @@
-const ApiResponse = require("../../../entities/ApiResponse");
-const ApiError = require("../../../entities/ApiError");
+const ApiResponse = require("@entities/ApiResponse");
+const ApiError = require("@entities/ApiError");
 
 const login = async (req, res, next) => {
     try {
-        return res.json(new ApiResponse(200, "User is logged in", req.user));
+        return res.json(new ApiResponse("User is logged in", req.user));
     } catch (err) {
         next(new ApiError(400, err.message, err, '/auth/me'));
     }
