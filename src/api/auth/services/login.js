@@ -35,7 +35,7 @@ const login = async (req, res, next) => {
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
         });
 
-        return res.json(new ApiResponse("User logged in successfully", {}));
+        return res.json(new ApiResponse({}, "User logged in successfully"));
     } catch (err) {
         next(new ApiError(400, err.message, err, "/auth/login"));
     }

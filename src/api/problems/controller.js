@@ -6,8 +6,15 @@ const problemSchema = require("./dtos/create-problem-dto");
 const createProblem = require("./services/createProblem");
 const addTestcases = require("./services/addTestcases");
 const addTestcasesSchema = require("./dtos/add-testcases-schema");
+const getAllProblems = require("./services/getAllProblems");
+const getProblemById = require("./services/getProblemById");
+const updateProblem = require("./services/updateProblem");
+const updateProblemDto = require("./dtos/update-problem-dto");
 
-router.post('/', isAuthenticated, isAdmin, zodValidator(problemSchema), createProblem);
 router.post('/testcases', zodValidator(addTestcasesSchema), addTestcases);
+router.post('/', isAuthenticated, isAdmin, zodValidator(problemSchema), createProblem);
+router.get('/', getAllProblems);
+router.get('/:id', getProblemById);
+router.put('/:id', isAuthenticated, isAdmin, zodValidator(updateProblemDto), updateProblem);
 
 module.exports = router;

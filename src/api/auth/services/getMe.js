@@ -1,7 +1,7 @@
 const ApiResponse = require("@entities/ApiResponse");
 const ApiError = require("@entities/ApiError");
 
-const login = async (req, res, next) => {
+const getMe = async (req, res, next) => {
     try {
         return res.json(new ApiResponse("User is logged in", req.user));
     } catch (err) {
@@ -9,4 +9,4 @@ const login = async (req, res, next) => {
     }
 }
 
-module.exports = login;
+module.exports = getMe;

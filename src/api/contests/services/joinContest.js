@@ -2,7 +2,7 @@ const ApiError = require("@entities/ApiError");
 const ApiResponse = require("@entities/ApiResponse");
 const prisma = require('@utils/prisma');
 
-module.exports = async (req, res, next) => {
+const joinContest = async (req, res, next) => {
     try {
         const {id} = req.params;
         const userId = req.user.id;
@@ -15,18 +15,18 @@ module.exports = async (req, res, next) => {
         });
 
         if (!contest) {
-            next(new ApiError(404, "Contest not found", {}, "contests/joinContest"))
+            return next(new ApiError(404, "Contest not found", {}, "contests/joinContest"))
         }
 
         // Check if contest has started
         const now = new Date();
         if (now < contest.startTime) {
-            next(new ApiError(404, "Contest has not started yet", {}, "contests/joinContest"))
+            return next(new ApiError(404, "Contest has not started yet", {}, "contests/joinContest"))
         }
 
         // Check if contest has ended
         if (now > contest.endTime) {
-            next(new ApiError(404, "Contest has already ended", {}, "contests/joinContest"))
+            return next(new ApiError(404, "Contest has already ended", {}, "contests/joinContest"))
         }
 
         // Check if user is already participating
@@ -39,7 +39,7 @@ module.exports = async (req, res, next) => {
         });
 
         if (existingParticipation) {
-            return res.status(400).json({error: 'Already participating in this contest'});
+            return next(new ApiError(400, "Already participating in this contest", {}, "contests/joinContest"))
         }
 
         // Create participation
@@ -51,6 +51,8 @@ module.exports = async (req, res, next) => {
 
         res.status(201).json(new ApiResponse(participation, "Successfully participated in contest"));
     } catch (error) {
-        next(new ApiError(500, "Coudn't join the contest", error, "contests/joinContest"))
+        next(new ApiError(500, "Couldn't join the contest", error, "contests/joinContest"))
     }
 }
+
+module.exports = joinContest;

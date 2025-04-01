@@ -51,7 +51,7 @@ const register = async (req, res, next) => {
             }, { timeout: 10000 });
 
             delete newUser.password;
-            return res.status(201).json(new ApiResponse("User created successfully", newUser));
+            return res.status(201).json(new ApiResponse(newUser, "User created successfully"));
         } catch (transactionError) {
             return next(new ApiError(400, transactionError.message, transactionError, "/auth/register"));
         }

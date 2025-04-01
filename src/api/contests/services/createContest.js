@@ -1,6 +1,8 @@
 const ApiError = require("@entities/ApiError");
 const prisma = require("@utils/prisma")
-module.exports = async (req, res, next) => {
+const ApiResponse = require("@entities/ApiResponse");
+
+const createContest = async (req, res, next) => {
     try {
         const {title, description, startTime, endTime, isVisible} = req.body;
 
@@ -9,7 +11,7 @@ module.exports = async (req, res, next) => {
         const end = new Date(endTime);
 
         if (end <= start) {
-            return res.status(400).json(new ApiError(400, "End time must be after start time", {}, "/contests/create"));
+            return next(new ApiError(400, "End time must be after start time", {}, "/contests/create"));
         }
 
         const contest = await prisma.contest.create({
@@ -22,8 +24,10 @@ module.exports = async (req, res, next) => {
             }
         });
 
-        res.status(201).json(contest);
+        res.status(201).json(new ApiResponse(contest, "Contest created successfully"));
     } catch (error) {
-        res.status(500).json({error: error.message});
+        next(new ApiError(500, "Couldn't create contest", error, "/contests/create"));
     }
 }
+
+module.exports = createContest;

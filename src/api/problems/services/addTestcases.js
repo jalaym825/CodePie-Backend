@@ -13,9 +13,7 @@ const addTestcases = async (req, res, next) => {
         });
 
         if (!problem) {
-            return res.status(404).json(
-                new ApiError(404, "Problem not found", null, "/problems/addTestcases")
-            );
+            return next(new ApiError(404, 'Problem not found', null, '/problems/addTestcases'));
         }
 
         // Create the test cases
