@@ -29,6 +29,7 @@ model User {
   email      String  @unique
   name       String
   password   String
+  isPasswordSet Boolean @default(true)
   isVerified Boolean @default(false)
   points     Int     @default(0)
 

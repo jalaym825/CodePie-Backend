@@ -6,6 +6,7 @@ const loginDto = require("./dtos/login-dto");
 const login = require("./services/login");
 const getMe = require("./services/getMe");
 const isAuthenticated = require('@middlewares/isAuthenticated');
+const googleCallback = require('./services/googleCallback');
 
 router.post('/register', zodValidator(registerDto), register);
 router.post('/login', zodValidator(loginDto), login);
@@ -14,5 +15,6 @@ router.post('/logout', (req, res) => {
     res.clearCookie('token');
     res.status(200).json({ message: 'Logged out successfully' });
 })
+router.get('/google-callback', googleCallback)
 
 module.exports = router;
