@@ -3,20 +3,19 @@ const jwt = require("jsonwebtoken");
 const ApiError = require("@entities/ApiError");
 
 module.exports = isAuthenticated = async (req, res, next) => {
-    const token = req.cookies?.token || req.header("Authorization")?.split(" ")[1];
+    const token = req.cookies?.access_token || req.header("Authorization")?.split(" ")[1];
     console.log(token);
     if (!token) {
         return next(new ApiError(401, "No token provided", {}, "/middleware/verifyJWT"));
     }
     try {
-        let payload = await jwt.verify(token.toString(), process.env.JWT_SECRET);
-
-        if (!payload.id) {
+        let payload = jwt.verify(token.toString(), process.env.JWT_SECRET);
+        if (!payload.userId) {
             return next(new ApiError(401, "Invalid token", {}, "/middleware/verifyJWT"));
         }
         const user = await prisma.user.findUnique({
             where: {
-                id: payload.id
+                id: payload.userId
             }
         });
         delete user.password;

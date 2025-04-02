@@ -14,7 +14,8 @@ const createSocketServer = (server) => {
     io.on('connection', (socket) => {
         socket.on('register', (userId) => {
             userSockets.set(userId, socket.id);
-            console.log(`User ${userId} connected with socket ID ${socket.id}`);
+            console.log(userSockets.get(userId))
+            console.log(`[xxx]-User ${userId} connected with socket ID ${socket.id}`);
         });
 
         socket.on('disconnect', () => {
@@ -27,12 +28,6 @@ const createSocketServer = (server) => {
     });
 };
 
-const sendNotification = (userId, notification) => {
-    if (userSockets.has(userId)) {
-        io.to(userSockets.get(userId)).emit('receive-notification', notification);
-    }
-};
-
 // Getter function for io instance
 const getIo = () => {
     if (!io) {
@@ -41,4 +36,13 @@ const getIo = () => {
     return io;
 };
 
-module.exports = { createSocketServer, getIo, sendNotification };
+const sendTestCaseResult = (userId, result) => {
+    const socketId = userSockets.get(userId);
+    if (socketId) {
+        io.to(socketId).emit('submissionResult', result);
+    } else {
+        console.log(`No socket found for user ${userId}`);
+    }
+};
+
+module.exports = { createSocketServer, getIo, userSockets, sendTestCaseResult };

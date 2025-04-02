@@ -1,5 +1,6 @@
 const axios = require('axios');
 const prisma = require('@utils/prisma');
+const { userSockets } = require('../socket');
 
 const judge0_url = process.env.JUDGE0_URL
 /**
@@ -46,7 +47,7 @@ const getSubmissionResult = async (token) => {
  * @param {number} memoryLimit Memory limit in kilobytes
  * @returns {Promise<Object>} The test case results
  */
-const judgeTestCase = async ({ sourceCode, languageId, input, expectedOutput, timeLimit, memoryLimit }) => {
+const judgeTestCase = async ({ sourceCode, languageId, input, expectedOutput, timeLimit, memoryLimit, userId }) => {
     try {
         // Prepare submission payload
         const payload = {
@@ -56,7 +57,7 @@ const judgeTestCase = async ({ sourceCode, languageId, input, expectedOutput, ti
             expected_output: expectedOutput || '',
             cpu_time_limit: 10,
             "memory_limit": 128000,
-            "callback_url": null
+            "callback_url": "http://172.16.105.14:3000" + "/submissions/callback?userId=" + userId,
         };
 
         console.log('Submitting to Judge0 with payload:', payload);
@@ -65,26 +66,25 @@ const judgeTestCase = async ({ sourceCode, languageId, input, expectedOutput, ti
         const response = await axios.post(`${judge0_url}/submissions`, payload, {
             headers: {
                 'Content-Type': 'application/json',
-                // 'X-Auth-Token': config.judge.authToken,
             }
         });
 
         const token = response.data.token;
         console.log(`Judge0 submission successful with token: ${token}`);
 
-        const result = await getSubmissionResult(token);
+        // const result = await getSubmissionResult(token);
 
         // Process the result
-        return {
-            status: mapJudgeStatus(result.status.id),
-            executionTime: result.time ? result.time * 1000 : null, // Convert to ms
-            memoryUsed: result.memory,
-            stdout: result.stdout || '',
-            stderr: result.stderr || '',
-            compilationOutput: result.compile_output || '',
-            passed: result.status.id === 3, // 3 = Accepted in Judge0
-            token
-        };
+        // return {
+        //     status: mapJudgeStatus(result.status.id),
+        //     executionTime: result.time ? result.time * 1000 : null, // Convert to ms
+        //     memoryUsed: result.memory,
+        //     stdout: result.stdout || '',
+        //     stderr: result.stderr || '',
+        //     compilationOutput: result.compile_output || '',
+        //     passed: result.status.id === 3, // 3 = Accepted in Judge0
+        //     token
+        // };
     } catch (error) {
         console.error('Error judging test case:', error);
 

@@ -89,7 +89,7 @@ const googleLogin = async (googleUser) => {
             }
         });
     }
-    const access_token = signToken(user.sys_id, user.email);
+    const access_token = signToken(user.id, user.email);
     return {
         message: 'User information from google',
         user,
@@ -98,7 +98,7 @@ const googleLogin = async (googleUser) => {
 }
 
 
-const signToken = async (
+const signToken = (
     userId,
     email,
 ) => {
