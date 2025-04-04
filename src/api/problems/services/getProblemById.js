@@ -5,7 +5,9 @@ const prisma = require("@utils/prisma");
 const getProblemById = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const isAdminUser = req.user.role === 'ADMIN';
+        console.log("User: ",req.user);
+        
+        const isAdminUser = (req.user?.role === 'ADMIN');
 
         const problem = await prisma.problem.findUnique({
             where: { id },
