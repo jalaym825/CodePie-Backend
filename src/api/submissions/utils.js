@@ -7,7 +7,7 @@ const { processAllTestCases } = require("@utils/judge0")
  * @param {string} submissionId The submission ID
  * @param {Array} testCases The test cases to run
  */
-async function processSubmission(submissionId, testCases) {
+async function processSubmission(submissionId, testCases, isSubmission, problemId) {
     try {
         // Get the submission details
         const submission = await prisma.submission.findUnique({
@@ -31,7 +31,9 @@ async function processSubmission(submissionId, testCases) {
         const { totalScore, overallStatus, results } = await processAllTestCases(
             submissionId,
             submission,
-            testCases
+            testCases,
+            isSubmission,
+            problemId
         );
 
         console.log(totalScore)

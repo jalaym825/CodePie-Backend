@@ -47,7 +47,7 @@ const getSubmissionResult = async (token) => {
  * @param {number} memoryLimit Memory limit in kilobytes
  * @returns {Promise<Object>} The test case results
  */
-const judgeTestCase = async ({ sourceCode, languageId, input, expectedOutput, timeLimit, memoryLimit, userId }) => {
+const judgeTestCase = async ({ sourceCode, languageId, input, expectedOutput, userId, isSubmission, problemId, testCaseId, submissionId }) => {
     try {
         // Prepare submission payload
         const payload = {
@@ -57,7 +57,7 @@ const judgeTestCase = async ({ sourceCode, languageId, input, expectedOutput, ti
             expected_output: expectedOutput || '',
             cpu_time_limit: 10,
             "memory_limit": 128000,
-            "callback_url": "http://172.16.105.14:3000" + "/submissions/callback?userId=" + userId,
+            "callback_url": "http://172.16.103.214:3000" + `/submissions/callback?userId=${userId}&isSubmission=${isSubmission}&problemId=${problemId}&testCaseId=${testCaseId}&submissionId=${submissionId}`,
         };
 
         console.log('Submitting to Judge0 with payload:', payload);
@@ -71,20 +71,6 @@ const judgeTestCase = async ({ sourceCode, languageId, input, expectedOutput, ti
 
         const token = response.data.token;
         console.log(`Judge0 submission successful with token: ${token}`);
-
-        // const result = await getSubmissionResult(token);
-
-        // Process the result
-        // return {
-        //     status: mapJudgeStatus(result.status.id),
-        //     executionTime: result.time ? result.time * 1000 : null, // Convert to ms
-        //     memoryUsed: result.memory,
-        //     stdout: result.stdout || '',
-        //     stderr: result.stderr || '',
-        //     compilationOutput: result.compile_output || '',
-        //     passed: result.status.id === 3, // 3 = Accepted in Judge0
-        //     token
-        // };
     } catch (error) {
         console.error('Error judging test case:', error);
 
@@ -143,25 +129,25 @@ const mapJudgeStatus = (judgeStatusId) => {
  * @param {Array} testCases The test cases to run
  * @returns {Promise<Object>} Results summary
  */
-const processAllTestCases = async (submissionId, submission, testCases) => {
+const processAllTestCases = async (submissionId, submission, testCases, isSubmission, problemId) => {
     try {
         const { sourceCode, languageId } = submission;
-        const { timeLimit, memoryLimit } = submission.problem;
 
         let totalScore = 0;
         let overallStatus = 'ACCEPTED';
 
         // Process each test case
-        const results = await Promise.all(testCases.map(async (testCase) => {
-            const result = await judgeTestCase({
+        const results = Promise.all(testCases.map(async (testCase) => {
+            const result = judgeTestCase({
                 sourceCode,
                 languageId,
                 input: testCase.input,
                 expectedOutput: testCase.output,
-                timeLimit,
-                memoryLimit
+                isSubmission: isSubmission,
+                problemId,
+                testCaseId: testCase.id,
+                submissionId
             });
-
 
             const testCaseResult = await prisma.testCaseResult.create({
                 data: {

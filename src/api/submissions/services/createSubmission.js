@@ -58,7 +58,7 @@ const createSubmission = async (req, res, next) => {
 
         // Process submission asynchronously
         // In production, you should use a proper queue system like Bull
-        processSubmission(submission.id, problem.testCases)
+        processSubmission(submission.id, problem.testCases, true, problem.id)
             .catch(err => console.error('Error processing submission:', err));
 
         return res.status(201).json(new ApiResponse(

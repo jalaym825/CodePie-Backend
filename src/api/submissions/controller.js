@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.put('/callback', async (req, res) => {
     const { stdout, time, memory, stderr, compile_output, message, status, token } = req.body;
-    const { userId } = req.query;
+    const { userId, isSubmission, problemId, testCaseId, submissionId } = req.query;
     const result = {
         stdout: stdout ? Buffer.from(stdout, 'base64').toString() : '',
         time,
@@ -26,6 +26,32 @@ router.put('/callback', async (req, res) => {
     }
     console.log(result)
     sendTestCaseResult("xyz", result);
+    if (isSubmission) {
+        const testCaseResult = await prisma.testCaseResult.create({
+            data: {
+                submissionId,
+                testCaseId: testCase.id,
+                status: result.status,
+                executionTime: result.executionTime,
+                memoryUsed: result.memoryUsed,
+                stdout: result.stdout,
+                stderr: result.stderr,
+                passed: result.passed
+            }
+        });
+
+        // Calculate score
+        if (result.passed) {
+            totalScore += testCase.points;
+        }
+
+        // Update overall status (prioritize errors)
+        if (result.status !== 'ACCEPTED' && overallStatus === 'ACCEPTED') {
+            overallStatus = result.status;
+        }
+
+        return testCaseResult;
+    }
     res.status(200).json({ message: 'Callback received' });
 })
 
