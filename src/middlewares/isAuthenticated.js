@@ -4,7 +4,6 @@ const ApiError = require("@entities/ApiError");
 
 module.exports = isAuthenticated = async (req, res, next) => {
     const token = req.cookies?.access_token || req.header("Authorization")?.split(" ")[1];
-    console.log(token);
     if (!token) {
         return next(new ApiError(401, "No token provided", {}, "/middleware/verifyJWT"));
     }
