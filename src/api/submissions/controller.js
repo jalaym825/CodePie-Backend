@@ -28,7 +28,7 @@ router.put('/callback', async (req, res) => {
         message,
         status
     };
-    sendTestCaseResult("xyz", result);
+    sendTestCaseResult(userId, result);
     
     // Convert Judge0 status to application TestCaseStatus
     let testCaseStatus;
