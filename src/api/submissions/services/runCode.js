@@ -9,8 +9,6 @@ const runCode = async (req, res, next) => {
     try {
         const { problemId, languageId, sourceCode, input, output } = req.body;
         const userId = req.user.id;
-        console.log("User:", userId);
-        
 
         // Check if problem exists and is visible
         const problem = await prisma.problem.findUnique({

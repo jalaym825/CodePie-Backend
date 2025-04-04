@@ -14,10 +14,8 @@ const { updateContestRanks } = require("./utils");
 const router = express.Router();
 
 router.put('/callback', async (req, res) => {
-    console.log("Callback received", req.body);
     const { stdout, time, memory, stderr, compile_output, message, status } = req.body;
     const { userId, isSubmission, problemId, testCaseId, submissionId } = req.query;
-    console.log(testCaseId)
     
     const result = {
         stdout: stdout ? Buffer.from(stdout, 'base64').toString() : '',

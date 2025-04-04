@@ -13,7 +13,7 @@ const updateProblemDto = require("./dtos/update-problem-dto");
 
 router.post('/testcases', zodValidator(addTestcasesSchema), addTestcases);
 router.post('/', isAuthenticated, isAdmin, zodValidator(problemSchema), createProblem);
-// router.get('/', getAllProblems);
+router.get('/', getAllProblems);
 router.get('/:id', getProblemById);
 router.put('/:id', isAuthenticated, isAdmin, zodValidator(updateProblemDto), updateProblem);
 
