@@ -24,14 +24,14 @@ const login = async (req, res, next) => {
             logger.debug(`[/auth/login] - email: ${email}`);
             return next(new ApiError(400, "Invalid email or password", {}, "/auth/login"));
         }
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+        const token = jwt.sign({ userId: user.id, email: user.email }, process.env.JWT_SECRET, {
             expiresIn: "7d",
         });
         logger.info(`[/auth/login] - success - ${user.email}`);
 
         delete user.password;
 
-        res.cookie("token", token, {
+        res.cookie("access_token", token, {
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
         });
 

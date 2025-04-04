@@ -129,16 +129,21 @@ const mapJudgeStatus = (judgeStatusId) => {
  * @param {Array} testCases The test cases to run
  * @returns {Promise<Object>} Results summary
  */
-const processAllTestCases = async (submissionId, submission, testCases, isSubmission, problemId) => {
+const processAllTestCases = async (submissionId, submission, testCases, isSubmission, problemId, userId) => {
     try {
         const { sourceCode, languageId } = submission;
 
-        let totalScore = 0;
-        let overallStatus = 'ACCEPTED';
-
         // Process each test case
-        const results = Promise.all(testCases.map(async (testCase) => {
-            const result = judgeTestCase({
+        Promise.all(testCases.map(async (testCase) => {
+            await prisma.testCaseResult.create({
+                data: {
+                    submissionId,
+                    testCaseId: testCase.id,
+                    status: "PROCESSING",
+                }
+            });
+            judgeTestCase({
+                userId,
                 sourceCode,
                 languageId,
                 input: testCase.input,
@@ -148,38 +153,7 @@ const processAllTestCases = async (submissionId, submission, testCases, isSubmis
                 testCaseId: testCase.id,
                 submissionId
             });
-
-            const testCaseResult = await prisma.testCaseResult.create({
-                data: {
-                    submissionId,
-                    testCaseId: testCase.id,
-                    status: result.status,
-                    executionTime: result.executionTime,
-                    memoryUsed: result.memoryUsed,
-                    stdout: result.stdout,
-                    stderr: result.stderr,
-                    passed: result.passed
-                }
-            });
-
-            // Calculate score
-            if (result.passed) {
-                totalScore += testCase.points;
-            }
-
-            // Update overall status (prioritize errors)
-            if (result.status !== 'ACCEPTED' && overallStatus === 'ACCEPTED') {
-                overallStatus = result.status;
-            }
-
-            return testCaseResult;
         }));
-
-        return {
-            totalScore,
-            overallStatus,
-            results
-        };
     } catch (error) {
         console.error('Error processing test cases:', error);
         throw new Error('Failed to process all test cases');

@@ -1,7 +1,6 @@
 const prisma = require("@utils/prisma")
 const { processAllTestCases } = require("@utils/judge0")
 
-
 /**
  * Process a submission by running it against all test cases
  * @param {string} submissionId The submission ID
@@ -28,32 +27,16 @@ async function processSubmission(submissionId, testCases, isSubmission, problemI
         });
 
         // Run all test cases
-        const { totalScore, overallStatus, results } = await processAllTestCases(
+        processAllTestCases(
             submissionId,
             submission,
             testCases,
             isSubmission,
-            problemId
+            problemId,
+            submission.userId
         );
-
-        console.log(totalScore)
-        // Update the submission with results
-        await prisma.submission.update({
-            where: { id: submissionId },
-            data: {
-                status: overallStatus,
-                score: totalScore,
-                judgedAt: new Date()
-            }
-        });
-
-        // Update user's participation score
-        await updateParticipationScore(submissionId);
-
-        return { totalScore, overallStatus };
     } catch (error) {
         console.error('Error processing submission:', error);
-
         // Update submission to show an error occurred
         await prisma.submission.update({
             where: { id: submissionId },
