@@ -7,7 +7,7 @@ const { judgeTestCase } = require("@utils/judge0");
 
 const runCode = async (req, res, next) => {
     try {
-        const { problemId, languageId, sourceCode, input, output } = req.body;
+        const { problemId, languageId, testCaseId, sourceCode, input, output } = req.body;
         const userId = req.user.id;
 
         // Check if problem exists and is visible
@@ -55,7 +55,8 @@ const runCode = async (req, res, next) => {
             languageId: parseInt(languageId),
             input,
             expectedOutput: output,
-            userId: userId
+            userId: userId,
+            testCaseId: testCaseId,
         })
         .catch(err => console.error('Error processing submission:', err));
 
