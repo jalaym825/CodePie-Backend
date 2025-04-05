@@ -31,13 +31,16 @@ const createProblem = async (req, res, next) => {
             return next(new ApiError(404, "Contest not found", null, "/problems/createProblem"));
         }
 
-        // Calculate distribution weight based on difficulty levels
+        // Filter only hidden test cases for point calculations
+        const hiddenTestCases = testCases.filter(tc => tc.isHidden === true);
+
+        // Calculate distribution weight based on difficulty levels for HIDDEN test cases only
         // Formula: (1*numEasy + 2*numMedium + 3*numHard)
         let easyCount = 0;
         let mediumCount = 0;
         let hardCount = 0;
 
-        testCases.forEach(tc => {
+        hiddenTestCases.forEach(tc => {
             switch (tc.difficulty || "EASY") {
                 case "EASY":
                     easyCount++;
@@ -53,8 +56,8 @@ const createProblem = async (req, res, next) => {
 
         const totalWeight = easyCount + (2 * mediumCount) + (3 * hardCount);
 
-        // If totalWeight is 0, default to equal distribution
-        const defaultPointsPerCase = totalWeight > 0 ? points / testCases.length : points / testCases.length;
+        // If totalWeight is 0 (no hidden test cases), set all points to 0
+        const defaultPointsPerCase = totalWeight > 0 ? points / hiddenTestCases.length : 0;
 
         const problem = await prisma.problem.create({
             data: {
@@ -68,6 +71,19 @@ const createProblem = async (req, res, next) => {
                 isVisible: isVisible !== undefined ? isVisible : true,
                 testCases: {
                     create: testCases && Array.isArray(testCases) ? testCases.map((tc) => {
+                        // If test case is not hidden, assign zero points regardless of difficulty
+                        if (!tc.isHidden) {
+                            return {
+                                input: tc.input || "",
+                                output: tc.output || "",
+                                explanation: tc.explanation || null,
+                                isHidden: false,
+                                difficulty: tc.difficulty || "EASY",
+                                points: 0,
+                            };
+                        }
+
+                        // For hidden test cases, calculate points based on difficulty
                         const difficulty = tc.difficulty || "EASY";
                         const difficultyValue = getDifficultyLevel(difficulty);
 
@@ -82,7 +98,7 @@ const createProblem = async (req, res, next) => {
                             input: tc.input || "",
                             output: tc.output || "",
                             explanation: tc.explanation || null,
-                            isHidden: tc.isHidden || false,
+                            isHidden: true,
                             difficulty: difficulty,
                             points: testCasePoints,
                         };
@@ -90,14 +106,22 @@ const createProblem = async (req, res, next) => {
                         input: "", output: "", isSample: true, isHidden: false, points: 0,
                     },],
                 },
-            }, include: {
+            }, 
+            include: {
                 testCases: true,
             },
         });
 
+        // Calculate and verify total points from only hidden test cases
+        const totalAssignedPoints = problem.testCases.reduce((sum, testCase) => 
+            testCase.isHidden ? sum + testCase.points : sum, 0);
+
         res
             .status(201)
-            .json(new ApiResponse(problem, "Problem created successfully"));
+            .json(new ApiResponse({
+                ...problem,
+                totalPoints: totalAssignedPoints
+            }, "Problem created successfully"));
     } catch (err) {
         next(new ApiError(400, err.message, err, "/problems/createProblem"));
     }
