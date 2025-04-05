@@ -132,9 +132,11 @@ const mapJudgeStatus = (judgeStatusId) => {
 const processAllTestCases = async (submissionId, submission, testCases, isSubmission, problemId, userId) => {
     try {
         const { sourceCode, languageId } = submission;
+        console.log(`Processing test case: ${testCases}`);
 
         // Process each test case
         Promise.all(testCases.map(async (testCase) => {
+            
             await prisma.testCaseResult.create({
                 data: {
                     submissionId,
