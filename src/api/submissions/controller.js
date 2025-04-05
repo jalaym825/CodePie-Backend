@@ -24,8 +24,12 @@ router.put('/callback', async (req, res) => {
         stderr: stderr ? Buffer.from(stderr, 'base64').toString() : '',
         compile_output: compile_output ? Buffer.from(compile_output, 'base64').toString() : '',
         message,
+        testCaseId,
+        submissionId,
         status
     };
+    console.log("\n\nJudge0 callback received:", result);
+    
     sendTestCaseResult(userId, result);
     
     // Convert Judge0 status to application TestCaseStatus
@@ -215,6 +219,7 @@ router.put('/callback', async (req, res) => {
                         submissionId,
                         status: overallStatus,
                         score: totalScore,
+                        testCaseId: testCaseId,
                         results: submission.testCaseResults
                     });
                 }
