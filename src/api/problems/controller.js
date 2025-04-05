@@ -10,11 +10,19 @@ const getAllProblems = require("./services/getAllProblems");
 const getProblemById = require("./services/getProblemById");
 const updateProblem = require("./services/updateProblem");
 const updateProblemDto = require("./dtos/update-problem-dto");
+const getPracticeProblems = require('./services/getPracticeProblems');
+const getPracticeProblemsById = require('./services/getPracticeProblemsById');
+const getProblemSolustions = require('./services/getProblemSolutions');
+const getProblemSolustionsById = require('./services/getProblemSolustionById');
 
 router.post('/testcases', zodValidator(addTestcasesSchema), addTestcases);
 router.post('/', isAuthenticated, isAdmin, zodValidator(problemSchema), createProblem);
 router.get('/', getAllProblems);
 router.get('/:id', getProblemById);
 router.put('/:id', isAuthenticated, isAdmin, zodValidator(updateProblemDto), updateProblem);
+router.post("/practice/",getPracticeProblems);
+router.get("/practice/:problemId", isAuthenticated, getPracticeProblemsById);
+router.get("/solustions/:problemId", isAuthenticated, getProblemSolustions);
+router.get("/:problemId/solustion/:solutionId", isAuthenticated, getProblemSolustionsById);
 
 module.exports = router;
