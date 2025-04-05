@@ -2,7 +2,7 @@ const ApiResponse = require("@entities/ApiResponse");
 const ApiError = require("@entities/ApiError");
 const prisma = require("@utils/prisma");
 
-const getAllProblems = async (req, res, next) => {
+const getPracticeProblems = async (req, res, next) => {
   try {
     const problems = await prisma.problem.findMany({
       where: {
@@ -24,8 +24,8 @@ const getAllProblems = async (req, res, next) => {
       .json(new ApiResponse(problems, "Problems fetched successfully"));
   } catch (error) {
     console.log(error);
-    next(new ApiError(500, error.message, error, "/practice/getAllProblems"));
+    next(new ApiError(500, error.message, error, "/problems/practice/"));
   }
 };
 
-module.exports = getAllProblems;
+module.exports = getPracticeProblems;

@@ -29,13 +29,13 @@ const getProblemSolustionsById = async (req, res, next) => {
 
         if (!solution) {
             return next(
-                new ApiError(404, "Solution not found", null, `/practice/getSolution/${solutionId}`)
+                new ApiError(404, "Solution not found", null, `/problem/${problemId}/solution/${solutionId}`)
             );
         }
         res.status(200).json(new ApiResponse(solution, "Solution fetched successfully"));
     } catch (error) {
         console.log(error);
-        next(new ApiError(500, error.message, error, "/practice/getSolution"));
+        next(new ApiError(500, error.message, error, `/problem/${problemId}/solution/${solutionId}`));
     }
 }
 

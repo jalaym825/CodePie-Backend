@@ -7,6 +7,8 @@ const getSubmissionDetails = require("./services/getSubmissionById");
 const runCode = require('./services/runCode');
 const axios = require('axios');
 const submissionCallback = require("./services/submissionCallback");
+const getAllSubmissionOfProblem = require('./services/getAllSubmissionOfProblem');
+const publishSubmission = require('./services/publishSubmission');
 
 const router = express.Router();
 

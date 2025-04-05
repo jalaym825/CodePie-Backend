@@ -2,7 +2,7 @@ const ApiResponse = require("@entities/ApiResponse");
 const ApiError = require("@entities/ApiError");
 const prisma = require("@utils/prisma");
 
-const getProblemById = async (req, res, next) => {
+const getPracticeProblemsById = async (req, res, next) => {
     try {
         const { problemId } = req.params;
     
@@ -20,15 +20,15 @@ const getProblemById = async (req, res, next) => {
     
         if (!problem) {
             return next(
-                new ApiError(404, "Problem not found", null, "/problems/getProblemById")
+                new ApiError(404, "Problem not found", null, `/problems/practice/${problemId}`)
             );
         }
     
         res.status(200).json(new ApiResponse(problem, "Problem fetched successfully"));
     } catch (error) {
         console.log(error);
-        next(new ApiError(500, error.message, error, "/problems/getProblemById"));
+        next(new ApiError(500, error.message, error, `/problems/practice/${problemId}`));
     }
 }
 
-module.exports = getProblemById;
+module.exports = getPracticeProblemsById;

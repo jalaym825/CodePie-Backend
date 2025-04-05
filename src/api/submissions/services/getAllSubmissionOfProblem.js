@@ -2,7 +2,7 @@ const ApiError = require("@entities/ApiError");
 const ApiResponse = require("@entities/ApiResponse");
 const prisma = require("@utils/prisma");
 
-const getSubmissionOfProblem = async (req, res, next) => {
+const getAllSubmissionOfProblem = async (req, res, next) => {
     try {
         const { id } = req.params;
         const userId = req.user.id;
@@ -50,4 +50,4 @@ const getSubmissionOfProblem = async (req, res, next) => {
     }
 };
 
-module.exports = getSubmissionOfProblem;
+module.exports = getAllSubmissionOfProblem;
