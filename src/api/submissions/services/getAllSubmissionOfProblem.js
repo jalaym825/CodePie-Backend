@@ -44,8 +44,8 @@ const getSubmissionOfProblem = async (req, res, next) => {
                 500,
                 error.message,
                 error,
-                `/submissions/getAllSubmissionOfProblem/${req.params.problemId}`
-            )
+                `/submissions/problem/${req.params.problemId}`
+            )   
         );
     }
 };

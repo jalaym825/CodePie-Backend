@@ -10,6 +10,7 @@ const runCode = require('./services/runCode');
 const { sendTestCaseResult } = require('../../socket');
 const axios = require('axios');
 const { updateContestRanks } = require("./utils");
+const getAllSubmissionOfProblem = require("./services/getAllSubmissionOfProblem")
 
 const router = express.Router();
 
@@ -240,6 +241,9 @@ router.post('/', isAuthenticated, createSubmission);
 router.get('/:id', isAuthenticated, getSubmissionDetails);
 
 router.post('/run', isAuthenticated, runCode);
+
+router.get('/problem/:id', isAuthenticated, getAllSubmissionOfProblem);
+
 
 // Get all submissions for a problem (admin only)
 // router.get('/problem/:problemId', isAuthenticated, isAdmin, getProblemSubmissions);
