@@ -4,7 +4,7 @@ const prisma = require("@utils/prisma");
 
 const getAllProblems = async (req, res, next) => {
     try {
-        const isAdminUser = req.user.role === 'ADMIN';
+        const isAdminUser = req.user?.role === 'ADMIN';
 
         const problems = await prisma.problem.findMany({
             where: {

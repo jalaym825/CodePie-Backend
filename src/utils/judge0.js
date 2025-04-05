@@ -57,7 +57,7 @@ const judgeTestCase = async ({ sourceCode, languageId, input, expectedOutput, us
             expected_output: expectedOutput || '',
             cpu_time_limit: 10,
             "memory_limit": 128000,
-            "callback_url": "http://172.24.92.103:3000" + `/submissions/callback?userId=${userId}&isSubmission=${isSubmission}&problemId=${problemId}&testCaseId=${testCaseId}&submissionId=${submissionId}`,
+            "callback_url": process.env.CALLBACK_URL + `/submissions/callback?userId=${userId}&isSubmission=${isSubmission}&problemId=${problemId}&testCaseId=${testCaseId}&submissionId=${submissionId}`,
         };
 
         console.log('Submitting to Judge0 with payload:', payload);
