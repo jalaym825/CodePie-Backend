@@ -20,7 +20,7 @@ router.post('/', isAuthenticated, isAdmin, zodValidator(problemSchema), createPr
 router.get('/', getAllProblems);
 router.get('/:id', getProblemById);
 router.put('/:id', isAuthenticated, isAdmin, zodValidator(updateProblemDto), updateProblem);
-router.get("/practice/", getPracticeProblems);
+router.post("/practice/",getPracticeProblems);
 router.get("/practice/:problemId", isAuthenticated, getPracticeProblemsById);
 router.get("/solustions/:problemId", isAuthenticated, getProblemSolustions);
 router.get("/:problemId/solustion/:solutionId", isAuthenticated, getProblemSolustionsById);

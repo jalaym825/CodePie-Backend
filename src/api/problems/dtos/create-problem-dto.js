@@ -45,6 +45,7 @@ const problemSchema = z.object({
     .nonnegative("Points must be a non-negative integer"),
   isVisible: z.boolean({ required_error: "Visibility status is required" }),
   isPractice: z.boolean({ required_error: "Practice status is required" }),
+  contestId: z.string(),
   testCases: z
     .array(testCaseSchema, { required_error: "Test cases is required" })
     .min(1, { message: "At least one test case is required" }),
