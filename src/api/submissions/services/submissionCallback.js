@@ -16,6 +16,12 @@ const submissionCallback = async (req, res, next) => {
 
         // Map Judge0 status codes to your application's TestCaseStatus enum
         switch (status.id) {
+            case 1: // In Queue
+                testCaseStatus = "IN_QUEUE";
+                break;
+            case 2: // Processing
+                testCaseStatus = "PROCESSING";
+                break;
             case 3: // Accepted
                 testCaseStatus = "ACCEPTED";
                 passed = true;
@@ -42,9 +48,6 @@ const submissionCallback = async (req, res, next) => {
                 break;
             case 14: // Exec Format Error
                 testCaseStatus = "EXEC_FORMAT_ERROR";
-                break;
-            case 15: // Memory Limit Exceeded
-                testCaseStatus = "MEMORY_LIMIT_EXCEEDED";
                 break;
             default:
                 testCaseStatus = "INTERNAL_ERROR";
