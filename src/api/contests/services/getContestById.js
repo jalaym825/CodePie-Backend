@@ -14,34 +14,13 @@ const getContestById = async (req, res, next) => {
                     where: {
                         isVisible: isAdminUser ? undefined : true
                     },
-                    // orderBy: {
-                    //     orderInContest: 'asc'
-                    // },
                     select: {
                         id: true,
                         title: true,
                         difficultyLevel: true,
                         points: true,
-                        // orderInContest: true
                     }
                 },
-                participations: {
-                    select: {
-                        userId: true,
-                        totalScore: true,
-                        rank: true,
-                        user: {
-                            select: {
-                                name: true,
-                                // fullName: true
-                            }
-                        }
-                    },
-                    orderBy: {
-                        totalScore: 'desc'
-                    },
-                    take: 100 // Top 100 participants
-                }
             }
         });
 
