@@ -3,7 +3,7 @@ const ApiError = require("@entities/ApiError");
 const prisma = require("@utils/prisma");
 
 
-const getProblemSolustions = async (req, res, next) => {
+const getProblemsolutions = async (req, res, next) => {
     try {
      const {problemId} = req.params;
         const { userId } = req.user;
@@ -15,7 +15,7 @@ const getProblemSolustions = async (req, res, next) => {
 
         if (!problem) {
             return next(
-                new ApiError(404, "Problem not found", null, `/problem/solustions//${req.params.problemId}`)
+                new ApiError(404, "Problem not found", null, `/problem/solutions//${req.params.problemId}`)
             );
         }
 
@@ -38,8 +38,8 @@ const getProblemSolustions = async (req, res, next) => {
         res.status(200).json(new ApiResponse(solutions, "Solutions fetched successfully"));
     } catch (error) {
         console.log(error);
-        next(new ApiError(500, error.message, error, `/problem/solustions//${req.params.problemId}`));
+        next(new ApiError(500, error.message, error, `/problem/solutions//${req.params.problemId}`));
     }
 }
 
-module.exports = getProblemSolustions;
+module.exports = getProblemsolutions;

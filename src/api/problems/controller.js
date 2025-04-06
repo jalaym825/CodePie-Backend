@@ -12,8 +12,8 @@ const updateProblem = require("./services/updateProblem");
 const updateProblemDto = require("./dtos/update-problem-dto");
 const getPracticeProblems = require('./services/getPracticeProblems');
 const getPracticeProblemsById = require('./services/getPracticeProblemsById');
-const getProblemSolustions = require('./services/getProblemSolutions');
-const getProblemSolustionsById = require('./services/getProblemSolustionById');
+const getProblemsolutions = require('./services/getProblemSolutions');
+const getProblemsolutionsById = require('./services/getProblemSolutionById');
 
 router.post('/testcases', zodValidator(addTestcasesSchema), addTestcases);
 router.post('/', isAuthenticated, isAdmin, zodValidator(problemSchema), createProblem);
@@ -22,7 +22,7 @@ router.get('/:id', getProblemById);
 router.put('/:id', isAuthenticated, isAdmin, zodValidator(updateProblemDto), updateProblem);
 router.post("/practice/",getPracticeProblems);
 router.get("/practice/:problemId", isAuthenticated, getPracticeProblemsById);
-router.get("/solustions/:problemId", isAuthenticated, getProblemSolustions);
-router.get("/:problemId/solustion/:solutionId", isAuthenticated, getProblemSolustionsById);
+router.get("/solutions/:problemId", isAuthenticated, getProblemsolutions);
+router.get("/:problemId/solustion/:solutionId", isAuthenticated, getProblemsolutionsById);
 
 module.exports = router;
