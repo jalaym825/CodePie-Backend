@@ -10,18 +10,6 @@ const submissionCallback = async (req, res, next) => {
 
         console.log(`Callback from Judge0 for userId: ${userId}, testCaseId: ${testCaseId}, submissionId: ${submissionId}`);
 
-        const result = {
-            stdout: stdout ? Buffer.from(stdout, 'base64').toString() : '',
-            time,
-            memory,
-            stderr: stderr ? Buffer.from(stderr, 'base64').toString() : '',
-            compile_output: compile_output ? Buffer.from(compile_output, 'base64').toString() : '',
-            message,
-            testCaseId,
-            status
-        };
-        sendTestCaseResult(userId, result);
-
         // Convert Judge0 status to application TestCaseStatus
         let testCaseStatus;
         let passed = false;
@@ -61,6 +49,38 @@ const submissionCallback = async (req, res, next) => {
             default:
                 testCaseStatus = "INTERNAL_ERROR";
         }
+
+        const result = {
+            stdout: stdout ? Buffer.from(stdout, 'base64').toString() : '',
+            time,
+            memory,
+            stderr: stderr ? Buffer.from(stderr, 'base64').toString() : '',
+            compile_output: compile_output ? Buffer.from(compile_output, 'base64').toString() : '',
+            message: message ? Buffer.from(message, 'base64').toString() : '',
+            testCaseId,
+            status: testCaseStatus
+        };
+
+        const problem = await prisma.problem.findUnique({
+            where: {
+                id: problemId
+            },
+            include: {
+                contest: true,
+            }
+        })
+        const testCase = await prisma.testCase.findUnique({
+            where: {
+                id: testCaseId
+            }
+        })
+        if(problem.contest && testCase && testCase.isHidden) {
+            if(problem.contest.startTime <= Date.now() && problem.contest.endTime >= Date.now()) {
+                delete result.stdout;
+                delete result.stderr;
+            }
+        }
+        sendTestCaseResult(userId, result);
 
         if (isSubmission === 'true') {
             try {
