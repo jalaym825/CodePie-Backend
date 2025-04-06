@@ -6,8 +6,7 @@ const getContestById = async (req, res, next) => {
     try {
         const { id } = req.params;
         const isAdminUser = req.user?.role === 'ADMIN';
-        const userId = req.user?.id || req.body.userId; // Get userId from authenticated user or request body
-
+        const userId = req.body.userId;
         const contest = await prisma.contest.findUnique({
             where: { id },
             include: {
