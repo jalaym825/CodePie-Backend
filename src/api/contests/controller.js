@@ -13,7 +13,7 @@ const updateContestDto = require("./dtos/update-contest-dto");
 
 router.post('/', isAuthenticated, isAdmin, zodValidator(createContestDto),  createContest);
 router.get('/', getAllContests);
-router.get('/:id', getContestById);
+router.post('/:id', getContestById);
 router.get('/:id/leaderboard', getLeaderboard);
 router.post('/:id/join', isAuthenticated, joinContest);
 router.put('/:id', isAuthenticated, isAdmin, zodValidator(updateContestDto), updateContest);
