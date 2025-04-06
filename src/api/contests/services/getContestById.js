@@ -14,15 +14,15 @@ const getContestById = async (req, res, next) => {
                     where: {
                         isVisible: isAdminUser ? undefined : true
                     },
-                    orderBy: {
-                        orderInContest: 'asc'
-                    },
+                    // orderBy: {
+                    //     orderInContest: 'asc'
+                    // },
                     select: {
                         id: true,
                         title: true,
                         difficultyLevel: true,
                         points: true,
-                        orderInContest: true
+                        // orderInContest: true
                     }
                 },
                 participations: {
@@ -32,8 +32,8 @@ const getContestById = async (req, res, next) => {
                         rank: true,
                         user: {
                             select: {
-                                username: true,
-                                fullName: true
+                                name: true,
+                                // fullName: true
                             }
                         }
                     },
