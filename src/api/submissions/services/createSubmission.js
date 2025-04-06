@@ -18,8 +18,8 @@ const createSubmission = async (req, res, next) => {
       include: {
         contest: true,
         testCases: {
-          where:{
-            isHidden:true
+          where: {
+            isHidden: true,
           }
         },
       },
