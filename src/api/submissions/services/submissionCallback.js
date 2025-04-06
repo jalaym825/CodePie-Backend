@@ -8,7 +8,7 @@ const submissionCallback = async (req, res, next) => {
         const { stdout, time, memory, stderr, compile_output, message, status } = req.body;
         const { userId, isSubmission, problemId, testCaseId, submissionId } = req.query;
 
-        console.log(`Callback from Judge0 for userId: ${userId}, testCaseId: ${testCaseId}, submissionId: ${submissionId}`);
+        console.log(`Callback from Judge0 for userId: ${userId}, testCaseId: ${testCaseId}, submissionId: ${submissionId}, isSubmission: ${isSubmission}`);
 
         // Convert Judge0 status to application TestCaseStatus
         let testCaseStatus;
@@ -52,6 +52,8 @@ const submissionCallback = async (req, res, next) => {
             default:
                 testCaseStatus = "INTERNAL_ERROR";
         }
+
+        console.log(testCaseStatus);
 
         const result = {
             stdout: stdout ? Buffer.from(stdout, 'base64').toString() : '',
@@ -112,7 +114,9 @@ const submissionCallback = async (req, res, next) => {
                         testCaseResults: true,
                         problem: {
                             include: {
-                                testCases: true
+                                testCases: {
+                                    where: {isHidden: true}
+                                }
                             }
                         }
                     }
@@ -125,6 +129,8 @@ const submissionCallback = async (req, res, next) => {
 
                 // If all test cases are processed, update submission status
                 if (processedTestCases === allTestCases.length) {
+                    console.log("all testcase processed");
+
                     // Calculate total score
                     let totalScore = 0;
                     for (const result of submission.testCaseResults) {
@@ -133,7 +139,7 @@ const submissionCallback = async (req, res, next) => {
                             totalScore += tc ? tc.points : 0;
                         }
                     }
-
+                    console.log("totalScore", totalScore)
                     // Determine overall submission status
                     let overallStatus;
                     const allPassed = submission.testCaseResults.every(result => result.passed);
@@ -152,6 +158,7 @@ const submissionCallback = async (req, res, next) => {
                         overallStatus = "WRONG_ANSWER";
                     }
 
+                    console.log("overallStatus", overallStatus)
                     // Update submission record
                     await prisma.submission.update({
                         where: { id: submissionId },
@@ -173,6 +180,7 @@ const submissionCallback = async (req, res, next) => {
 
                     // contest must be live to update participation score
                     if (problem && problem.contest && problem.contest.startTime <= new Date() && problem.contest.endTime >= new Date()) {
+                        console.log("contest is live")
                         const participation = await prisma.participation.findUnique({
                             where: {
                                 userId_contestId: {
@@ -205,7 +213,7 @@ const submissionCallback = async (req, res, next) => {
                                 }
                             }
 
-                            const totalParticipationScore = Object.values(problemScores).reduce((sum, score) => sum + score, 0);
+                            let totalParticipationScore = Object.values(problemScores).reduce((sum, score) => sum + score, 0);
 
                             // Update participation record
                             await prisma.participation.update({
@@ -213,7 +221,7 @@ const submissionCallback = async (req, res, next) => {
                                     id: participation.id
                                 },
                                 data: {
-                                    totalScore: totalParticipationScore,
+                                    totalScore: overallStatus === "ACCEPTED" ? problem.points : totalParticipationScore,
                                     scoreUpdatedAt: new Date()
                                 }
                             });

@@ -22,6 +22,7 @@ const getLeaderboard = async (req, res, next) => {
             },
             orderBy: [
                 { totalScore: 'desc' },
+                {scoreUpdatedAt: 'asc'},
                 { user: { name: 'asc' } }
             ]
         });

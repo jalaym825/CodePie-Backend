@@ -12,11 +12,6 @@ const testCaseSchema = z.object({
   isHidden: z
     .boolean({ required_error: "Hidden status is required" })
     .default(false),
-  points: z
-    .number({ required_error: "Test case points are required" })
-    .int()
-    .nonnegative("Points must be a non-negative integer")
-    .default(10),
   difficulty: z.enum(["EASY", "MEDIUM", "HARD"], {
     required_error: "Difficulty level is required",
   }),
