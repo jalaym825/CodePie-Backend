@@ -8,7 +8,7 @@ const testCaseSchema = z.object({
   output: z
     .string({ required_error: "Test case output is required" })
     .min(1, "Test case output is required"),
-  explanation: z.string().optional(),
+  explanation: z.string(),
   isHidden: z
     .boolean({ required_error: "Hidden status is required" })
     .default(false),
