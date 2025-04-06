@@ -16,15 +16,13 @@ const getLeaderboard = async (req, res, next) => {
                 rank: true,
                 user: {
                     select: {
-                        username: true,
-                        fullName: true,
-                        avatarUrl: true
+                        name: true
                     }
                 }
             },
             orderBy: [
                 { totalScore: 'desc' },
-                { user: { username: 'asc' } }
+                { user: { name: 'asc' } }
             ]
         });
 
