@@ -17,6 +17,7 @@ const submissionCallback = async (req, res, next) => {
             stderr: stderr ? Buffer.from(stderr, 'base64').toString() : '',
             compile_output: compile_output ? Buffer.from(compile_output, 'base64').toString() : '',
             message,
+            testCaseId,
             status
         };
         sendTestCaseResult(userId, result);
