@@ -29,9 +29,9 @@ const getProblemById = async (req, res, next) => {
             const contestEnded = new Date() > new Date(problem.contest.endTime);
 
             // Filter test cases based on visibility conditions
-            if (!isAdminUser && !contestEnded) {
-                problem.testCases = problem.testCases.filter(tc => !tc.isHidden);
-            }
+            // if (!isAdminUser && !contestEnded) {
+            //     problem.testCases = problem.testCases.filter(tc => !tc.isHidden);
+            // }
         } else if (problem && !isAdminUser) {
             // If no contest or contest not found, regular users still can't see hidden test cases
             problem.testCases = problem.testCases.map(tc => {
