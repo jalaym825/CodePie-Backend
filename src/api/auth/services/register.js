@@ -7,7 +7,7 @@ const ApiError = require("@entities/ApiError");
 
 const register = async (req, res, next) => {
     try {
-        const { email, password, firstName, lastName, role } = req.body;
+        const { email, password, name, role } = req.body;
         const user = await prisma.user.findUnique({
             where: {
                 email: email.toLowerCase(),
