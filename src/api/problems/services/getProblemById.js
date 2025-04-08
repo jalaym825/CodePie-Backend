@@ -35,19 +35,30 @@ const getProblemById = async (req, res, next) => {
             // Filter test cases based on visibility conditions
             if (!isAdminUser && !contestEnded) {
                 problem.testCases = problem.testCases.map(tc => {
-                    return {
-                        id: tc.id
+                    if(tc.isHidden) {
+                        return {
+                            id: tc.id,
+                            isHidden: true,
+                        }
+                    } else {
+                        return tc;
                     }
                 });
             }
         } else if (problem && !isAdminUser) {
             // If no contest or contest not found, regular users still can't see hidden test cases
             problem.testCases = problem.testCases.map(tc => {
-                return {
-                    id: tc.id
+                if(tc.isHidden) {
+                    return {
+                        id: tc.id,
+                        isHidden: true,
+                    }
+                } else {
+                    return tc;
                 }
             });
         }
+        console.log(problem);
 
         res.json(new ApiResponse(problem, "Problem fetched successfully"));
     } catch (err) {
