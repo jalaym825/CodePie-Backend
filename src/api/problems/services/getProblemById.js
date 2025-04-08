@@ -23,15 +23,23 @@ const getProblemById = async (req, res, next) => {
         if (!isAdminUser && !problem.isVisible) {
             return next(new ApiError(403, 'Problem is not visible to you', null, '/problems/getProblemById'));
         }
+        // if contest is not started then don't return the problem
+        if (problem.contest && new Date() < new Date(problem.contest.startTime)) {
+            return next(new ApiError(403, 'Contest has not started yet', null, '/problems/getProblemById'));
+        }
 
         // If we found the problem and it has associated contest data
         if (problem && problem.contest) {
             const contestEnded = new Date() > new Date(problem.contest.endTime);
 
             // Filter test cases based on visibility conditions
-            // if (!isAdminUser && !contestEnded) {
-            //     problem.testCases = problem.testCases.filter(tc => !tc.isHidden);
-            // }
+            if (!isAdminUser && !contestEnded) {
+                problem.testCases = problem.testCases.map(tc => {
+                    return {
+                        id: tc.id
+                    }
+                });
+            }
         } else if (problem && !isAdminUser) {
             // If no contest or contest not found, regular users still can't see hidden test cases
             problem.testCases = problem.testCases.map(tc => {
