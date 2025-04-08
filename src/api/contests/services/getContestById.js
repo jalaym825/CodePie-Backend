@@ -33,6 +33,11 @@ const getContestById = async (req, res, next) => {
             return next(new ApiError(403, 'Contest is not visible', null, `/contests/${id}`));
         }
 
+        // if contest isn't started, don't send problems, send other info only
+        if (!isAdminUser && new Date() < new Date(contest.startTime)) {
+            contest.problems = [];
+        }
+
         // Check if user has joined this contest
         let isJoined = false;
         if (userId) {
