@@ -26,13 +26,13 @@ const register = async (req, res, next) => {
             newUser = await prisma.$transaction(async (_prisma) => {
                 const createdUser = await _prisma.user.create({
                     data: {
-                        name: firstName + " " + lastName,
+                        name: name,
                         email: email.toLowerCase(),
                         password: hashedPassword,
                     },
                 });
 
-                logger.info(`[/auth/register] - success - ${createdUser.sys_id}`);
+                logger.info(`[/auth/register] - success - ${createdUser.id}`);
                 logger.debug(`[/auth/register] - email: ${email}`);
 
                 // send verification email with link
