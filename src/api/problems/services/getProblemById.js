@@ -19,10 +19,6 @@ const getProblemById = async (req, res, next) => {
             return next(new ApiError(404, 'Problem not found', null, '/problems/getProblemById'));
         }
 
-        // Check if the problem is visible to the user
-        if (!isAdminUser && !problem.isVisible) {
-            return next(new ApiError(403, 'Problem is not visible to you', null, '/problems/getProblemById'));
-        }
         // if contest is not started then don't return the problem
         if (problem.contest && new Date() < new Date(problem.contest.startTime)) {
             return next(new ApiError(403, 'Contest has not started yet', null, '/problems/getProblemById'));

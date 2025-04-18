@@ -13,7 +13,6 @@ const createSubmission = async (req, res, next) => {
     const problem = await prisma.problem.findUnique({
       where: {
         id: problemId,
-        isVisible: true,
       },
       include: {
         contest: true,

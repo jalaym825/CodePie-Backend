@@ -11,9 +11,6 @@ const getContestById = async (req, res, next) => {
             where: { id },
             include: {
                 problems: {
-                    where: {
-                        isVisible: isAdminUser ? undefined : true
-                    },
                     select: {
                         id: true,
                         title: true,
