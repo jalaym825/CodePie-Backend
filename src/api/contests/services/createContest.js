@@ -20,7 +20,8 @@ const createContest = async (req, res, next) => {
                 description,
                 startTime: start,
                 endTime: end,
-                isVisible: isVisible !== undefined ? isVisible : false
+                isVisible: isVisible !== undefined ? isVisible : false,
+                createdById: req.user.id,
             }
         });
 

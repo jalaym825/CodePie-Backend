@@ -11,11 +11,11 @@ const getLeaderboard = require('./services/getLeaderboard');
 const updateContest = require('./services/updateContest');
 const updateContestDto = require("./dtos/update-contest-dto");
 
-router.post('/', isAuthenticated, isAdmin, zodValidator(createContestDto),  createContest);
-router.get('/', getAllContests);
-router.post('/:id', getContestById);
+router.post('/', isAuthenticated(), isAdmin, zodValidator(createContestDto),  createContest);
+router.get('/', isAuthenticated(false), getAllContests);
+router.post('/:id', isAuthenticated(false), getContestById);
 router.get('/:id/leaderboard', getLeaderboard);
-router.post('/:id/join', isAuthenticated, joinContest);
-router.put('/:id', isAuthenticated, isAdmin, zodValidator(updateContestDto), updateContest);
+router.post('/:id/join', isAuthenticated(), joinContest);
+router.put('/:id', isAuthenticated(), isAdmin, zodValidator(updateContestDto), updateContest);
 
 module.exports = router;

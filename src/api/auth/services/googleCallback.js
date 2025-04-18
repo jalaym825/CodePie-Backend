@@ -30,7 +30,7 @@ const googleCallback = async (req, res, next) => {
 
         res.redirect(`${process.env.FRONTEND_URL}${state.from || '/'}`);
     } catch (error) {
-        next(new ApiError(500, "Couldn't join the contest", error, "auth/googleCallback"))
+        next(new ApiError(500, "Google login failed", error, "auth/googleCallback"))
     }
 }
 
