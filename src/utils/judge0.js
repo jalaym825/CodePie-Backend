@@ -60,8 +60,6 @@ const judgeTestCase = async ({ sourceCode, languageId, input, expectedOutput, us
             "callback_url": process.env.CALLBACK_URL + `/submissions/callback?userId=${userId}&isSubmission=${isSubmission}&problemId=${problemId}&testCaseId=${testCaseId}&submissionId=${submissionId}`,
         };
 
-        console.log('Submitting to Judge0 with payload:', payload);
-
         // Submit to Judge0
         const response = await axios.post(`${judge0_url}/submissions`, payload, {
             headers: {
@@ -70,7 +68,6 @@ const judgeTestCase = async ({ sourceCode, languageId, input, expectedOutput, us
         });
 
         const token = response.data.token;
-        console.log(`Judge0 submission successful with token: ${token}`);
     } catch (error) {
         console.error('Error judging test case:', error);
 

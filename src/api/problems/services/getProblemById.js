@@ -54,8 +54,6 @@ const getProblemById = async (req, res, next) => {
                 }
             });
         }
-        console.log(problem);
-
         res.json(new ApiResponse(problem, "Problem fetched successfully"));
     } catch (err) {
         next(new ApiError(500, err.message, err, '/problems/getAllProblems'));

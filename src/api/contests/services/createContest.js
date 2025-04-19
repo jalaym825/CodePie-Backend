@@ -4,7 +4,7 @@ const ApiResponse = require("@entities/ApiResponse");
 
 const createContest = async (req, res, next) => {
     try {
-        const {title, description, startTime, endTime, isVisible} = req.body;
+        const {title, description, startTime, endTime, isVisible, overview} = req.body;
 
         // Validate dates
         const start = new Date(startTime);
@@ -22,6 +22,7 @@ const createContest = async (req, res, next) => {
                 endTime: end,
                 isVisible: isVisible !== undefined ? isVisible : false,
                 createdById: req.user.id,
+                overview
             }
         });
 

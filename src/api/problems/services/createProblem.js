@@ -94,7 +94,6 @@ const createProblem = async (req, res, next) => {
       timeLimit: timeLimit || 1000,
       memoryLimit: memoryLimit || 256,
       points: points || 100,
-      isVisible: isVisible !== undefined ? isVisible : true,
       testCases: {
         create:
           testCases && Array.isArray(testCases)

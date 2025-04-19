@@ -14,8 +14,7 @@ const createSocketServer = (server) => {
     io.on('connection', (socket) => {
         socket.on('register', (userId) => {
             userSockets.set(userId, socket.id);
-            console.log(userSockets.get(userId))
-            console.log(`[xxx]-User ${userId} connected with socket ID ${socket.id}`);
+            console.log(`User ${userId} connected with socket ID ${socket.id}`);
         });
 
         socket.on('disconnect', () => {

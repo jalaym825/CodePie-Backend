@@ -8,6 +8,7 @@ const createContestSchema = z.object({
     endTime: z.string({ required_error: "End time is required" })
         .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid end time" }),
     isVisible: z.boolean().optional(),
+    overview: z.string({ required_error: "Description is required" }).min(1, "Description is required")
 });
 
 module.exports = createContestSchema;

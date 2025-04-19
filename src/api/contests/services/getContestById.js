@@ -6,7 +6,6 @@ const getContestById = async (req, res, next) => {
     try {
         const { id } = req.params;
         const isAdminUser = req.user?.role === 'ADMIN';
-        const userId = req.body.userId;
         const contest = await prisma.contest.findUnique({
             where: { id },
             include: {
@@ -37,11 +36,11 @@ const getContestById = async (req, res, next) => {
 
         // Check if user has joined this contest
         let isJoined = false;
-        if (userId) {
+        if (req.user) {
             const participation = await prisma.participation.findUnique({
                 where: {
                     userId_contestId: {
-                        userId: userId,
+                        userId: req.user.id,
                         contestId: id
                     }
                 }

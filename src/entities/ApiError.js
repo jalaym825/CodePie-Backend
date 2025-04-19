@@ -1,6 +1,6 @@
 class ApiError extends Error {
     constructor(code, message = "Something went wrong", error = {}, path = "") {
-        super(message);
+        super(error?.name?.includes("Prisma") ? "Something went wrong..." : message);
         this.code = code;
         this.error = error;
         this.path = path;

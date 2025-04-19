@@ -62,6 +62,8 @@ const submissionCallback = async (req, res, next) => {
             status: testCaseStatus
         };
 
+        console.log(result)
+
         const problem = await prisma.problem.findUnique({
             where: {
                 id: problemId
@@ -125,8 +127,6 @@ const submissionCallback = async (req, res, next) => {
 
                 // If all test cases are processed, update submission status
                 if (processedTestCases === allTestCases.length) {
-                    console.log("all testcase processed");
-
                     // Calculate total score
                     let totalScore = 0;
                     for (const result of submission.testCaseResults) {
@@ -135,7 +135,6 @@ const submissionCallback = async (req, res, next) => {
                             totalScore += tc ? tc.points : 0;
                         }
                     }
-                    console.log("totalScore", totalScore)
                     // Determine overall submission status
                     let overallStatus;
                     const allPassed = submission.testCaseResults.every(result => result.passed);
@@ -175,7 +174,6 @@ const submissionCallback = async (req, res, next) => {
 
                     // contest must be live to update participation score
                     if (problem && problem.contest && problem.contest.startTime <= new Date() && problem.contest.endTime >= new Date()) {
-                        console.log("contest is live")
                         const participation = await prisma.participation.findUnique({
                             where: {
                                 userId_contestId: {
@@ -203,7 +201,6 @@ const submissionCallback = async (req, res, next) => {
                             const problemScores = {};
                             for (const sub of userSubmissions) {
                                 if (!problemScores[sub.problemId] || sub.score > problemScores[sub.problemId]) {
-                                    console.log(sub.score)
                                     problemScores[sub.problemId] = sub.score;
                                 }
                             }

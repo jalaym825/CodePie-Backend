@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const ApiError = require("@entities/ApiError");
 
 const isAuthenticated = (authRequired=true) => async (req, res, next) => {
-    console.log(authRequired)
     const token = req.cookies?.access_token || req.header("Authorization")?.split(" ")[1];
     if (!token && authRequired) {
         return next(new ApiError(401, "No token provided", {}, "/middleware/verifyJWT"));
