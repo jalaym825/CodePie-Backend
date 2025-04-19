@@ -29,27 +29,29 @@ const createSubmission = async (req, res, next) => {
     }
 
     // Check if the contest is active
-    if (!problem.isPractice) {
-      const now = new Date();
-      if (now < problem.contest.startTime || now > problem.contest.endTime) {
-        return next(
-          new ApiError(400, "Contest is not active", null, "/submissions")
-        );
+    // if (!problem.isPractice) {
+    //   const now = new Date();
+    //   if (now < problem.contest.startTime || now > problem.contest.endTime) {
+    //     return next(
+    //       new ApiError(400, "Contest is not active", null, "/submissions")
+    //     );
+    //   }
+    // }
+
+    // if contest is live and user hasn't participated
+    if (problem.contest && problem.contest.startTime >= new Date() && problem.contest.endTime <= new Date()) {
+      const participation = await prisma.participation.findUnique({
+        where: {
+          userId_contestId: {
+            userId,
+            contestId: problem.contest.id
+          }
+        }
+      });
+      if (!participation) {
+        return next(new ApiError(400, "You need to join the contest", null, "/submissions/createSubmission"));
       }
     }
-    // Check if user is participating in the contest
-    // const participation = await prisma.participation.findUnique({
-    //     where: {
-    //         userId_contestId: {
-    //             userId,
-    //             contestId: problem.contest.id
-    //         }
-    //     }
-    // });
-    //
-    // if (!participation) {
-    //     return next(new ApiError(400, 'Not participating in this contest', null, '/submissions'));
-    // }
 
     // Create the submission record
     const submission = await prisma.submission.create({
@@ -77,7 +79,7 @@ const createSubmission = async (req, res, next) => {
         )
       );
   } catch (error) {
-    return next(new ApiError(500, error.message, error, "/submissions"));
+    return next(new ApiError(500, error.message, error, "/submissions/createSubmission"));
   }
 };
 

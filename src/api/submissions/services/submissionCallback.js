@@ -8,8 +8,6 @@ const submissionCallback = async (req, res, next) => {
         const { stdout, time, memory, stderr, compile_output, message, status } = req.body;
         const { userId, isSubmission, problemId, testCaseId, submissionId } = req.query;
 
-        console.log(`Callback from Judge0 for userId: ${userId}, testCaseId: ${testCaseId}, submissionId: ${submissionId}, isSubmission: ${isSubmission}`);
-
         // Convert Judge0 status to application TestCaseStatus
         let testCaseStatus;
         let passed = false;
@@ -52,8 +50,6 @@ const submissionCallback = async (req, res, next) => {
             default:
                 testCaseStatus = "INTERNAL_ERROR";
         }
-
-        console.log(testCaseStatus);
 
         const result = {
             stdout: stdout ? Buffer.from(stdout, 'base64').toString() : '',
@@ -158,7 +154,6 @@ const submissionCallback = async (req, res, next) => {
                         overallStatus = "WRONG_ANSWER";
                     }
 
-                    console.log("overallStatus", overallStatus)
                     // Update submission record
                     await prisma.submission.update({
                         where: { id: submissionId },

@@ -20,9 +20,9 @@ const joinContest = async (req, res, next) => {
 
         // Check if contest has started
         const now = new Date();
-        if (now < contest.startTime) {
-            return next(new ApiError(404, "Contest has not started yet", {}, "contests/joinContest"))
-        }
+        // if (now < contest.startTime) {
+        //     return next(new ApiError(404, "Contest has not started yet", {}, "contests/joinContest"))
+        // }
 
         // Check if contest has ended
         if (now > contest.endTime) {
