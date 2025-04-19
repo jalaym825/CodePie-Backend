@@ -1,6 +1,6 @@
 const axios = require('axios');
 const prisma = require('@utils/prisma');
-const { userSockets } = require('../socket');
+const { userSockets, sendTestCaseResult } = require('../socket');
 
 const judge0_url = process.env.JUDGE0_URL
 /**
@@ -69,6 +69,16 @@ const judgeTestCase = async ({ sourceCode, languageId, input, expectedOutput, us
 
         const token = response.data.token;
     } catch (error) {
+        sendTestCaseResult(userId, {
+            stdout: 'Internal Error',
+            time: 0,
+            memory: 0,
+            stderr: 'Internal Error',
+            compile_output: 'Internal Error',
+            message: 'INTERNAL_ERROR',
+            testCaseId,
+            status: 'INTERNAL_ERROR',
+        })
         console.error('Error judging test case:', error);
 
         // Handle different types of errors
