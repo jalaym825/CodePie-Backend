@@ -4,8 +4,6 @@ const ApiError = require("@entities/ApiError");
 const prisma = require("@utils/prisma");
 
 const generateMarkdownFromJSON = (q) => {
-    const slug = q.title.toLowerCase().replace(/[^\w\s]/gi, '').replace(/\s+/g, '-');
-
     let md = `## Description\n\n${q.description.trim()}\n\n`;
 
     md += `## Input Format\n\n${q.inputFormat.trim()}\n\n`;
@@ -37,17 +35,18 @@ const generateMarkdownFromJSON = (q) => {
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-async function generateDSAQuestion(topics) {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+async function generateDSAQuestion(topics, difficulty) {
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-preview-04-17" });
 
     const systemPrompt = `
-You are a DSA question generator bot. Generate a single coding question based on the given topic.
+You are a DSA question generator bot. Generate a single coding question based on the given topic and difficulty.
 
 You are strictly instructed to follow below instructions:
 - Generate exactly 13 test cases:
-  - First 3 test cases MUST have "hidden": false and contain a proper "explanation".
-  - Remaining 10 test cases MUST have "hidden": true and remove "explanation" field.
-  - Do NOT include more or fewer test cases than 13.
+    - First 3 test cases MUST have "hidden": false and contain a proper "explanation".
+    - Remaining 10 test cases MUST have "hidden": true and remove "explanation" field.
+    - Do NOT include more or fewer test cases than 13.
+- IMPORTANT: Carefully verify that outputs are correct for each input. Every output must logically match the expected result based on input and problem description.
 - The \`inputFormat\` and \`outputFormat\` must describe the format clearly, e.g., "First line contains \`N\`, second line contains \`N\` space-separated integers".
 - In the \`constraints\`, use the format "1 <= N <= 10^5".
 - The \`input\` of each test case must match the described format. Use raw values line-by-line, like stdin.
@@ -55,7 +54,7 @@ You are strictly instructed to follow below instructions:
 - Output must be strict, clean JSON.
 - JSON must be parseable with JSON.parse. No trailing commas.
 - Provide a clear, detailed English problem statement.
-- Please ensure that all testacase and their output is right.
+- Response should be under limit so that it can be sent over http
 
 Strictly follow this format:
 
@@ -78,7 +77,7 @@ Strictly follow this format:
 }
     `.trim();
 
-    const userPrompt = `Topics: ${topics.join(', ')}`;
+    const userPrompt = `Topics: ${topics.join(', ')}, Difficulty: ${difficulty}`;
 
     const result = await model.generateContent({
         contents: [
@@ -87,10 +86,10 @@ Strictly follow this format:
             },
         ]
     });
-    
-    console.log(result)
 
     let content = result.response.text().trim();
+    console.log("Gemini response:", content);
+    
 
     if (content.startsWith('```json')) content = content.slice(7);
     if (content.endsWith('```')) content = content.slice(0, -3);
@@ -108,8 +107,8 @@ Strictly follow this format:
 
 const generateQuestion = async (req, res, next) => {
     try {
-        const { topics } = req.body;
-        const question = await generateDSAQuestion(topics);
+        const { topics, difficulty } = req.body;
+        const question = await generateDSAQuestion(topics, difficulty);
 
         res.json(new ApiResponse(question, "Question generated successfully"));
     } catch (err) {
