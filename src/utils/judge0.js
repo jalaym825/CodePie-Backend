@@ -3,39 +3,6 @@ const prisma = require('@utils/prisma');
 const { userSockets, sendTestCaseResult } = require('../socket');
 
 const judge0_url = process.env.JUDGE0_URL
-/**
- * Get the submission result from Judge0
- * @param {string} token The submission token
- * @returns {Promise<Object>} The submission results
- */
-const getSubmissionResult = async (token) => {
-    try {
-        // Implement with polling since Judge0 is asynchronous
-        let result;
-        let attempts = 0;
-        const maxAttempts = 30; // 30 attempts with 1s interval = 30s max wait time
-
-        while (attempts < maxAttempts) {
-            const response = await axios.get(`${judge0_url}/submissions/${token}`);
-
-            result = response.data;
-
-            // Check if the submission is processed
-            if (result.status.id > 2) { // Not in queue or processing
-                return result;
-            }
-
-            // Wait before next poll
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            attempts++;
-        }
-
-        throw new Error('Judge result timed out');
-    } catch (error) {
-        console.error('Error getting judge result:', error.message);
-        throw new Error('Failed to get judge submission result');
-    }
-};
 
 /**
  * Submit a solution to Judge0 with a specific test case input
@@ -48,64 +15,28 @@ const getSubmissionResult = async (token) => {
  * @returns {Promise<Object>} The test case results
  */
 const judgeTestCase = async ({ sourceCode, languageId, input, expectedOutput, userId, isSubmission, problemId, testCaseId, submissionId }) => {
-    try {
-        // Prepare submission payload
-        const payload = {
-            source_code: sourceCode,
-            language_id: parseInt(languageId), // Ensure languageId is a number
-            stdin: input || '',
-            expected_output: expectedOutput || '',
-            cpu_time_limit: 10,
-            "memory_limit": 128000,
-            "callback_url": process.env.CALLBACK_URL + `/submissions/callback?userId=${userId}&isSubmission=${isSubmission}&problemId=${problemId}&testCaseId=${testCaseId}&submissionId=${submissionId}`,
-        };
+    // Prepare submission payload
+    const payload = {
+        source_code: sourceCode,
+        language_id: parseInt(languageId), // Ensure languageId is a number
+        stdin: input || '',
+        expected_output: expectedOutput || '',
+        cpu_time_limit: 10,
+        "memory_limit": 128000,
+        "callback_url": process.env.CALLBACK_URL + `/submissions/callback?userId=${userId}&isSubmission=${isSubmission}&problemId=${problemId}&testCaseId=${testCaseId}&submissionId=${submissionId}`,
+    };
 
-        // Submit to Judge0
-        const response = await axios.post(`${judge0_url}/submissions`, payload, {
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-
-        const token = response.data.token;
-    } catch (error) {
-        sendTestCaseResult(userId, {
-            stdout: 'Internal Error',
-            time: 0,
-            memory: 0,
-            stderr: 'Internal Error',
-            compile_output: 'Internal Error',
-            message: 'INTERNAL_ERROR',
-            testCaseId,
-            status: 'INTERNAL_ERROR',
-        })
-        console.error('Error judging test case:', error);
-
-        // Handle different types of errors
-        if (error.response) {
-            // The request was made and the server responded with a status code
-            // that falls out of the range of 2xx
-            console.error('Judge0 API error details:', {
-                status: error.response.status,
-                statusText: error.response.statusText,
-                data: error.response.data
-            });
-
-            if (error.response.status === 422) {
-                // Provide more specific error info for validation errors
-                const errorDetail = error.response.data?.error || 'Invalid submission parameters';
-                throw new Error(`Judge0 validation error: ${errorDetail}`);
-            }
-        } else if (error.request) {
-            // The request was made but no response was received
-            console.error('No response received from Judge0 API');
-            throw new Error('No response received from judge service');
+    // Submit to Judge0
+    const response = await axios.post(`${judge0_url}/submissions`, payload, {
+        headers: {
+            'Content-Type': 'application/json',
         }
+    });
 
-        // Generic error case
-        throw new Error(`Failed to judge test case: ${error.message}`);
-    }
+    const token = response.data.token;
+    return token;
 };
+
 /**
  * Map Judge0 status IDs to our application status strings
  * @param {number} judgeStatusId The Judge0 status ID
@@ -141,35 +72,74 @@ const processAllTestCases = async (submissionId, submission, testCases, isSubmis
         const { sourceCode, languageId } = submission;
 
         // Process each test case
-        Promise.all(testCases.map(async (testCase) => {
-            await prisma.testCaseResult.create({
-                data: {
-                    submissionId,
+        let failed = 0;
+        for (const testCase of testCases) {
+            try {
+                await prisma.testCaseResult.create({
+                    data: {
+                        submissionId,
+                        testCaseId: testCase.id,
+                        status: "PROCESSING",
+                    }
+                });
+
+                await judgeTestCase({
+                    userId,
+                    sourceCode,
+                    languageId,
+                    input: testCase.input,
+                    expectedOutput: testCase.output,
+                    isSubmission,
+                    problemId,
                     testCaseId: testCase.id,
-                    status: "PROCESSING",
+                    submissionId
+                });
+            } catch (testCaseError) {
+                failed++;
+                // Handle individual test case errors without crashing the whole batch
+                console.error(`Error processing test case ${testCase.id}:`, testCaseError);
+
+                sendTestCaseResult(userId, {
+                    stdout: '',
+                    time: 0,
+                    memory: 0,
+                    stderr: 'Judge0 server error: ' + (testCaseError.message || 'Unknown error'),
+                    compile_output: '',
+                    message: 'INTERNAL_ERROR',
+                    testCaseId: testCase.id,
+                    status: 'INTERNAL_ERROR',
+                });
+
+                await prisma.testCaseResult.update({
+                    where: {
+                        submissionId_testCaseId: {
+                            submissionId,
+                            testCaseId: testCase.id
+                        }
+                    },
+                    data: {
+                        status: "INTERNAL_ERROR",
+                        stderr: "Error processing test case"
+                    }
+                });
+            }
+        }
+        if(failed === testCases.length) {
+            await prisma.submission.update({
+                where: { id: submissionId },
+                data: {
+                    status: "INTERNAL_ERROR",
                 }
             });
-            judgeTestCase({
-                userId,
-                sourceCode,
-                languageId,
-                input: testCase.input,
-                expectedOutput: testCase.output,
-                isSubmission: isSubmission,
-                problemId,
-                testCaseId: testCase.id,
-                submissionId
-            });
-        }));
+        }
     } catch (error) {
-        console.error('Error processing test cases:', error);
-        throw new Error('Failed to process all test cases');
+        // Log but don't throw, to prevent server crash
+        console.error('Error processing all test cases:', error);
     }
 };
 
+
 module.exports = {
-    // submitToJudge,
-    getSubmissionResult,
     judgeTestCase,
     processAllTestCases,
     mapJudgeStatus
