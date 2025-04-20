@@ -10,7 +10,7 @@ const googleCallback = require('./services/googleCallback');
 
 router.post('/register', zodValidator(registerDto), register);
 router.post('/login', zodValidator(loginDto), login);
-router.get('/me', isAuthenticated(), getMe);
+router.get('/me', isAuthenticated, getMe);
 router.post('/logout', (req, res) => {
     res.clearCookie('access_token');
     res.status(200).json({ message: 'Logged out successfully' });

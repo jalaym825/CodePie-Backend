@@ -13,6 +13,15 @@ const updateContest = async (req, res, next) => {
             return next(new ApiError(404, "Contest not found", {}, "/contests/update"));
         }
 
+        // if contest is live, starttime is not updatable
+        const currentDate = new Date();
+
+        if (currentDate >= new Date(existingContest.startTime)) {
+            if (startTime) {
+                return next(new ApiError(400, "Contest is live, start time can't be updated", {}, "/contests/update"));
+            }
+        }
+        
         const updatedContest = await prisma.contest.update({
             where: { id },
             data: {

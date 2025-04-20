@@ -14,15 +14,23 @@ const getPracticeProblems = require('./services/getPracticeProblems');
 const getPracticeProblemsById = require('./services/getPracticeProblemsById');
 const getProblemSolutions = require('./services/getProblemSolutions');
 const getProblemSolutionsById = require('./services/getProblemSolutionById');
+const generateQuestion = require("./services/generateQuestion")
 
 router.post('/testcases', zodValidator(addTestcasesSchema), addTestcases);
-router.post('/', isAuthenticated(), isAdmin, zodValidator(problemSchema), createProblem);
-router.get('/', isAuthenticated(false), getAllProblems);
-router.get('/:id', isAuthenticated(false), getProblemById);
-router.put('/:id', isAuthenticated(), isAdmin, zodValidator(updateProblemDto), updateProblem);
-router.post("/practice/",getPracticeProblems);
-router.get("/practice/:problemId", isAuthenticated(), getPracticeProblemsById);
-router.get("/solutions/:problemId", isAuthenticated(), getProblemSolutions);
-router.get("/:problemId/solustion/:solutionId", isAuthenticated(), getProblemSolutionsById);
+router.post('/', isAuthenticated, isAdmin, zodValidator(problemSchema), createProblem);
+
+router.get('/', getAllProblems);
+
+router.get("/practice", getPracticeProblems);
+
+router.get('/:id', getProblemById);
+
+router.put('/:id', isAuthenticated, isAdmin, zodValidator(updateProblemDto), updateProblem);
+
+router.get("/practice/:problemId", isAuthenticated, getPracticeProblemsById);
+router.get("/solutions/:problemId", isAuthenticated, getProblemSolutions);
+router.get("/:problemId/solustion/:solutionId", isAuthenticated, getProblemSolutionsById);
+
+router.post("/generate", generateQuestion);
 
 module.exports = router;
