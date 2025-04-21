@@ -15,6 +15,11 @@ const getContestById = async (req, res, next) => {
                         title: true,
                         difficultyLevel: true,
                         points: true,
+                        submissions: {
+                            select: {
+                                status: true
+                            }
+                        }
                     }
                 },
             }
@@ -28,6 +33,29 @@ const getContestById = async (req, res, next) => {
         if (!isAdminUser && !contest.isVisible) {
             return next(new ApiError(403, 'Contest is not visible', null, `/contests/${id}`));
         }
+
+        // Calculate acceptance rate for each problem
+        contest.problems = contest.problems.map(problem => {
+            const totalSubmissions = problem.submissions.length;
+            console.log(problem.id, totalSubmissions);
+            const acceptedSubmissions = problem.submissions.filter(
+                submission => submission.status === 'ACCEPTED'
+            ).length;
+            
+            const acceptanceRate = totalSubmissions > 0 
+                ? (acceptedSubmissions / totalSubmissions) * 100
+                : 0;
+            
+            const formattedAcceptanceRate = Number(acceptanceRate.toFixed(2));
+            
+            const { submissions, ...problemData } = problem;
+            
+            return {
+                ...problemData,
+                acceptanceRate: formattedAcceptanceRate,
+                totalSubmissions
+            };
+        });
 
         // if contest isn't started, don't send problems, send other info only
         if (!isAdminUser && new Date() < new Date(contest.startTime)) {
