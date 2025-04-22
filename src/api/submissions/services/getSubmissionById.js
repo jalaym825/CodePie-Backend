@@ -42,7 +42,11 @@ const getSubmissionDetails = async (req, res, next) => {
                                 points: true,
                             }
                         }
-                    }
+                    },
+                    orderBy: [
+                        { testCase: { points: 'asc' } },
+                        { testCase: { createdAt: 'asc' } }
+                    ]
                 }
             }
         });

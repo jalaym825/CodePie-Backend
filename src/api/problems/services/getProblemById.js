@@ -10,7 +10,12 @@ const getProblemById = async (req, res, next) => {
         const problem = await prisma.problem.findUnique({
             where: { id },
             include: {
-                testCases: true,
+                testCases: {
+                    orderBy: [
+                        { points: "asc" },
+                        { createdAt: "asc" }
+                    ]
+                },
                 contest: true
             }
         });
