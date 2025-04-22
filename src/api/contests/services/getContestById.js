@@ -20,7 +20,11 @@ const getContestById = async (req, res, next) => {
                                 status: true
                             }
                         }
-                    }
+                    },
+                    orderBy: [
+                        { points: "asc" },
+                        { createdAt: "asc" }
+                    ]
                 },
             }
         });
@@ -41,15 +45,15 @@ const getContestById = async (req, res, next) => {
             const acceptedSubmissions = problem.submissions.filter(
                 submission => submission.status === 'ACCEPTED'
             ).length;
-            
-            const acceptanceRate = totalSubmissions > 0 
+
+            const acceptanceRate = totalSubmissions > 0
                 ? (acceptedSubmissions / totalSubmissions) * 100
                 : 0;
-            
+
             const formattedAcceptanceRate = Number(acceptanceRate.toFixed(2));
-            
+
             const { submissions, ...problemData } = problem;
-            
+
             return {
                 ...problemData,
                 acceptanceRate: formattedAcceptanceRate,

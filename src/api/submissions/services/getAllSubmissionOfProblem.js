@@ -2,6 +2,7 @@ const ApiError = require("@entities/ApiError");
 const ApiResponse = require("@entities/ApiResponse");
 const prisma = require("@utils/prisma");
 const { default: axios } = require("axios");
+const { languages } = require("@utils/judge0");
 
 const getAllSubmissionOfProblem = async (req, res, next) => {
     try {
@@ -12,6 +13,9 @@ const getAllSubmissionOfProblem = async (req, res, next) => {
             where: {
                 problemId: id,
                 userId: userId,
+            },
+            orderBy: {
+                submittedAt: "desc",
             },
             select: {
                 submittedAt: true,
@@ -43,12 +47,13 @@ const getAllSubmissionOfProblem = async (req, res, next) => {
             },
         });
 
-        const languages = await axios.get(process.env.JUDGE0_URL + "/languages")
-        submissions.map(sub => {
-            sub.language = languages.data.filter(lang => lang.id === sub.languageId)[0].name
-            delete sub.languageId;
-            return sub;
-        });
+        if (submissions.length > 0) {
+            submissions.map(sub => {
+                sub.language = languages.filter(lang => lang.id === sub.languageId)[0].name
+                delete sub.languageId;
+                return sub;
+            });
+        }
         return res.status(200).json(new ApiResponse(submissions, "Submissions fetched successfully"));
     } catch (error) {
         return next(
@@ -57,7 +62,7 @@ const getAllSubmissionOfProblem = async (req, res, next) => {
                 error.message,
                 error,
                 `/submissions/problem/${req.params.problemId}`
-            )   
+            )
         );
     }
 };

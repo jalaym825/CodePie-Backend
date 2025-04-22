@@ -77,13 +77,14 @@ const submissionCallback = async (req, res, next) => {
                 id: testCaseId
             }
         })
+        const resToSend = {...result};
         if(problem.contest && testCase && testCase.isHidden) {
             if(problem.contest.startTime <= Date.now() && problem.contest.endTime >= Date.now()) {
-                delete result.stdout;
-                delete result.stderr;
+                delete resToSend.stdout;
+                delete resToSend.stderr;
             }
         }
-        sendTestCaseResult(userId, result);
+        sendTestCaseResult(userId, resToSend);
 
         if (isSubmission === 'true') {
             try {

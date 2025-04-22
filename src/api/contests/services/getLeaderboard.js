@@ -40,9 +40,10 @@ const getLeaderboard = async (req, res, next) => {
                 difficultyLevel: true,
                 points: true
             },
-            orderBy: {
-                createdAt: 'asc'
-            }
+            orderBy: [
+                { createdAt: 'asc' },
+                { points: 'asc' }
+            ]
         });
 
         // Get all submissions for this contest
@@ -65,28 +66,28 @@ const getLeaderboard = async (req, res, next) => {
         const leaderboardData = participations.map((participation, index) => {
             // Get all submissions for this user
             const userSubmissions = submissions.filter(sub => sub.userId === participation.userId);
-            
+
             // Calculate problems solved
             const solvedProblems = new Set(
                 userSubmissions
                     .filter(sub => sub.status === "ACCEPTED")
                     .map(sub => sub.problemId)
             );
-            
+
             // Calculate submission statistics
             const totalSubmissions = userSubmissions.length;
             const acceptedSubmissions = userSubmissions.filter(sub => sub.status === "ACCEPTED").length;
-            
+
             // Calculate per-problem scores
             const problemScores = {};
             problems.forEach(problem => {
                 // Find the best score for this problem
                 const problemSubmissions = userSubmissions.filter(sub => sub.problemId === problem.id);
-                const bestSubmission = problemSubmissions.length > 0 
-                    ? problemSubmissions.reduce((best, current) => 
+                const bestSubmission = problemSubmissions.length > 0
+                    ? problemSubmissions.reduce((best, current) =>
                         (current.score > best.score) ? current : best, problemSubmissions[0])
                     : null;
-                
+
                 problemScores[problem.id] = {
                     problemId: problem.id,
                     title: problem.title,
@@ -97,7 +98,7 @@ const getLeaderboard = async (req, res, next) => {
                     attempts: problemSubmissions.length
                 };
             });
-            
+
             return {
                 rank: index + 1,
                 userId: participation.userId,
@@ -106,8 +107,8 @@ const getLeaderboard = async (req, res, next) => {
                 solvedCount: solvedProblems.size,
                 totalProblems: problems.length,
                 submissionCount: totalSubmissions,
-                acceptanceRate: totalSubmissions > 0 
-                    ? Math.round((acceptedSubmissions / totalSubmissions) * 100) 
+                acceptanceRate: totalSubmissions > 0
+                    ? Math.round((acceptedSubmissions / totalSubmissions) * 100)
                     : 0,
                 finishTime: participation.scoreUpdatedAt,
                 problemScores: problemScores

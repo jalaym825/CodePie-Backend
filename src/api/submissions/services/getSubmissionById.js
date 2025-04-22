@@ -20,9 +20,12 @@ const getSubmissionDetails = async (req, res, next) => {
                         title: true,
                         contestId: true,
                         points: true,
+                        difficultyLevel: true,
                         contest: {
                             select: {
-                                title: true
+                                title: true,
+                                startTime: true,
+                                endTime: true
                             }
                         }
                     }
@@ -36,7 +39,7 @@ const getSubmissionDetails = async (req, res, next) => {
                                 output: true,
                                 explanation: true,
                                 isHidden: true,
-                                points: true
+                                points: true,
                             }
                         }
                     }
@@ -56,7 +59,8 @@ const getSubmissionDetails = async (req, res, next) => {
         // For non-admins, filter out hidden test cases or hide their details
         if (!isAdminUser) {
             submission.testCaseResults = submission.testCaseResults.map(result => {
-                if (result.testCase.isHidden) {
+                const now = new Date();
+                if (result.testCase.isHidden && submission.problem.contest.endTime >= now) {
                     return {
                         ...result,
                         testCase: {

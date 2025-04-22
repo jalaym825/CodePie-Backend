@@ -31,6 +31,6 @@ router.get("/practice/:problemId", isAuthenticated, getPracticeProblemsById);
 router.get("/solutions/:problemId", isAuthenticated, getProblemSolutions);
 router.get("/:problemId/solustion/:solutionId", isAuthenticated, getProblemSolutionsById);
 
-router.post("/generate", generateQuestion);
+router.post("/generate", isAuthenticated, isAdmin, generateQuestion);
 
 module.exports = router;
