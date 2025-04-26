@@ -36,10 +36,7 @@ const updateProblem = async (req, res, next) => {
         }
 
         // Check if the problem is part of any live contest
-        const currentTime = new Date();
-        const isPartOfLiveContest = existingProblem.contests && existingProblem.contests.some(
-            contest => currentTime >= new Date(contest.startTime) && currentTime <= new Date(contest.endTime)
-        );
+        const isPartOfLiveContest = existingProblem.contest && existingProblem.contest.startTime <= new Date() && existingProblem.contest.endTime >= new Date();
 
         // Prepare update data for problem
         const updateData = {};
@@ -100,6 +97,7 @@ const updateProblem = async (req, res, next) => {
                     };
                     
                     // Only update difficulty if not in live contest
+                    console.log("isPartOfLiveContest", isPartOfLiveContest);
                     if (!isPartOfLiveContest && testcase.difficulty !== undefined) {
                         testcaseUpdateData.difficulty = testcase.difficulty;
                     }
