@@ -89,7 +89,6 @@ const updateProblem = async (req, res, next) => {
         });
 
         // Handle testcase updates separately if provided
-        console.log("Testcases to update:", testCases);
         if (testCases && Array.isArray(testCases)) {
             for (const testcase of testCases) {
                 if (testcase.id) {
@@ -104,7 +103,6 @@ const updateProblem = async (req, res, next) => {
                     if (!isPartOfLiveContest && testcase.difficulty !== undefined) {
                         testcaseUpdateData.difficulty = testcase.difficulty;
                     }
-                    console.log("Testcase Update Data:", testcaseUpdateData);
                     await prisma.testCase.update({
                         where: { id: testcase.id },
                         data: testcaseUpdateData
