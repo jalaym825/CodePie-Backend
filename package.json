@@ -39,6 +39,7 @@
     "nodemailer": "^6.10.0",
     "nodemon": "^3.1.9",
     "ollama": "^0.5.15",
+    "openai": "^4.95.1",
     "socket.io": "^4.8.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",

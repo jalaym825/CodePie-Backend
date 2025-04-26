@@ -6,6 +6,8 @@ const getContestById = async (req, res, next) => {
     try {
         const { id } = req.params;
         const isAdminUser = req.user?.role === 'ADMIN';
+        const userId = req.user?.id;
+        
         const contest = await prisma.contest.findUnique({
             where: { id },
             include: {
@@ -17,7 +19,8 @@ const getContestById = async (req, res, next) => {
                         points: true,
                         submissions: {
                             select: {
-                                status: true
+                                status: true,
+                                userId: true
                             }
                         }
                     },
@@ -38,7 +41,7 @@ const getContestById = async (req, res, next) => {
             return next(new ApiError(403, 'Contest is not visible', null, `/contests/${id}`));
         }
 
-        // Calculate acceptance rate for each problem
+        // Calculate acceptance rate for each problem and check if user has solved it
         contest.problems = contest.problems.map(problem => {
             const totalSubmissions = problem.submissions.length;
             console.log(problem.id, totalSubmissions);
@@ -51,13 +54,21 @@ const getContestById = async (req, res, next) => {
                 : 0;
 
             const formattedAcceptanceRate = Number(acceptanceRate.toFixed(2));
+            
+            // Check if the current user has solved this problem
+            const isSolved = userId 
+                ? problem.submissions.some(
+                    submission => submission.userId === userId && submission.status === 'ACCEPTED'
+                  )
+                : false;
 
             const { submissions, ...problemData } = problem;
 
             return {
                 ...problemData,
                 acceptanceRate: formattedAcceptanceRate,
-                totalSubmissions
+                totalSubmissions,
+                isSolved
             };
         });
 
