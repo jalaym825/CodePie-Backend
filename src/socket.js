@@ -5,7 +5,7 @@ const userSockets = new Map();
 const createSocketServer = (server) => {
     io = socketIo(server, {
         cors: {
-            origin: process.env.FRONTEND_URL || 'http://localhost:5173', // Whitelist this origin
+            origin: process.env.FRONTEND_URL || 'http://127.0.0.1:5173', // Whitelist this origin
             methods: ['GET', 'POST'],       // Allowed HTTP methods
             credentials: true               // Allow credentials (cookies, authorization headers, etc.)
         }

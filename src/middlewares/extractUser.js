@@ -8,7 +8,12 @@ const extractUser = async (req, res, next) => {
     return next();
   }
   try {
-    let payload = jwt.verify(token.toString(), process.env.JWT_SECRET);
+    let payload;
+    try {
+      payload = jwt.verify(token,process.env.JWT_SECRET)
+    } catch (error) {
+      return next();
+    }
     if (!payload.userId) {
       return next();
     }
