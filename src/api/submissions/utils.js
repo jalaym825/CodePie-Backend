@@ -1,5 +1,5 @@
 const prisma = require("@utils/prisma")
-const { processAllTestCases } = require("@utils/judge0")
+const { processAllTestCases,processAllTestCases_batched } = require("@utils/judge0")
 
 /**
  * Process a submission by running it against all test cases
@@ -27,7 +27,7 @@ async function processSubmission(submissionId, testCases, isSubmission, problemI
         });
 
         // Run all test cases
-        processAllTestCases(
+        processAllTestCases_batched(
             submissionId,
             submission,
             testCases,
