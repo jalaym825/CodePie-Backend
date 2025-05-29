@@ -144,10 +144,20 @@ function formatWithClang(code) {
 /**
  * Format code with black (Python)
  */
+
+const isBlackAvailable = () => {
+    return new Promise((resolve) => {
+        exec('python -m black --version', (err) => {
+            resolve(!err); // true if black is available
+        });
+    });
+};
+
 function formatWithBlack(code) {
     return new Promise((resolve, reject) => {
-        if (!isToolInstalled('black')) {
+        if (!isBlackAvailable()) {
             // Fallback to prettier if black is not available
+            console.warn("black formatter is not installed, falling back to prettier");
             return formatWithPrettier(code, 'python')
                 .then(resolve)
                 .catch(() => {
@@ -162,7 +172,7 @@ function formatWithBlack(code) {
 
         // Cross-platform command
         const catCommand = os.platform() === 'win32' ? 'type' : 'cat';
-        exec(`black -q "${filePath}" && ${catCommand} "${filePath}"`, async (err, stdout, stderr) => {
+        exec(`python -m black -q "${filePath}" && ${catCommand} "${filePath}"`, async (err, stdout, stderr) => {
             try {
                 // If command fails, try to read the file directly
                 if (err) {
@@ -214,9 +224,9 @@ function formatWithPrettier(code, parser) {
                 // For Java, we need the plugin but we'll handle that in formatJava
                 throw new Error("Java requires special handling");
             }
-
+            
             const formatted = prettier.format(code, options);
-
+            
             resolve({
                 success: true,
                 data: formatted,

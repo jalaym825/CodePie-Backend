@@ -4,7 +4,7 @@ const { updateContestRanks } = require("../utils");
 
 const submissionCallback = async (req, res, next) => {
     try {
-
+        
         const { stdout, time, memory, stderr, compile_output, message, status } = req.body;
         const { userId, isSubmission, problemId, testCaseId, submissionId } = req.query;
 

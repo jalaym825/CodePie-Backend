@@ -38,6 +38,63 @@ const judgeTestCase = async ({ sourceCode, languageId, input, expectedOutput, us
 };
 
 /**
+ * Submit a solution to Judge0 with a specific test case input
+ * @param {string} sourceCode The source code to run
+ * @param {number} languageId The language ID
+ * @param {string} input The test case input
+ * @param {string} userId The user ID
+ * @param {boolean} isSubmission Whether this is a submission or not
+ * @param {string} expectedOutput The expected output
+ * @param {number} timeLimit Time limit in milliseconds
+ * @param {number} memoryLimit Memory limit in kilobytes
+ * @returns {Promise<Object>} The test case results
+ */
+const judgeBatchTestCase = async ({
+    sourceCode,
+    languageId,
+    userId,
+    isSubmission,
+    problemId,
+    testCases,
+    submissionId,
+}) => {
+
+    // Validate input parameters
+    if (!sourceCode || !languageId || !userId || !problemId || !submissionId) {
+        throw new Error("Missing required parameters for Judge0 submission");
+    }
+    
+    // Prepare submission payload
+            const batchPayload = {
+            submissions: testCases.map((testCase) => ({
+                source_code: sourceCode,
+                language_id: parseInt(languageId),
+                stdin: testCase.input || "",
+                expected_output: testCase.output || "",
+                cpu_time_limit: 10,
+                memory_limit: 128000,
+                callback_url: `${process.env.CALLBACK_URL}/submissions/callback?userId=${userId}&isSubmission=${isSubmission}&problemId=${problemId}&testCaseId=${testCase.id}&submissionId=${submissionId}`,
+            })),
+        };
+
+    // Submit to Judge0
+    const response = await axios.post(
+            `${judge0_url}/submissions/batch`,
+            batchPayload,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+    const tokens = response.data;
+    console.log("Judge0 submission token:", tokens.length);
+
+    return tokens;
+};
+
+/**
  * Map Judge0 status IDs to our application status strings
  * @param {number} judgeStatusId The Judge0 status ID
  * @returns {string} Our application status string
@@ -134,7 +191,103 @@ const processAllTestCases = async (submissionId, submission, testCases, isSubmis
         }
     } catch (error) {
         // Log but don't throw, to prevent server crash
-        console.error('Error processing all test cases:', error);
+        console.error("Error processing all test cases:", error);
+    }
+};
+
+// Alternative version of processAllTestCases that handles errors more gracefully
+const processAllTestCases_batched = async (
+    submissionId,
+    submission,
+    testCases,
+    isSubmission,
+    problemId,
+    userId
+) => {
+
+    const BATCH_SIZE_LIMIT = 20; // Adjust based on Judge0 limits
+    const MAX_SOURCE_CODE_SIZE = 64 * 1024; // 64KB limit
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY_BASE = 1000; // 1 second base delay
+
+    // Validate test cases
+    if (!Array.isArray(testCases) || testCases.length === 0) {
+        throw new Error("Invalid test cases provided");
+    }
+    // Validate each test case
+    const validTestCases = testCases.filter(tc => tc && tc.id && typeof tc.id === 'string');
+    if (validTestCases.length === 0) {
+        throw new Error("No valid test cases provided");
+    }
+
+    if (validTestCases.length !== testCases.length) {
+        console.warn(`Filtered out ${testCases.length - validTestCases.length} invalid test cases`);
+    }
+
+    testCases = validTestCases;
+    
+    try {
+        const { sourceCode, languageId } = submission;
+
+        // Create test case results in batch
+        await prisma.$transaction(
+            testCases.map((testCase) => {
+                return prisma.testCaseResult.create({
+                    data: {
+                        submissionId,
+                        testCaseId: testCase.id,
+                        status: "PROCESSING",
+                    },
+                });
+            })
+        );
+
+        // Prepare payloads for all test cases
+        const results = await judgeBatchTestCase({
+            sourceCode,
+            languageId,
+            userId,
+            isSubmission,
+            problemId,
+            testCases,
+            submissionId,
+        });
+    
+        console.log("Batch submission tokens:", results.length);
+
+        if (results.length !== testCases.length) {
+            throw new Error(
+                "Batch submission did not return expected number of results"
+            );
+        }
+    } catch (error) {
+        // Log but don't throw, to prevent server crash
+        console.error("Error processing all test cases:", error);
+        // Update all test case results with INTERNAL_ERROR if batch fails completely
+        await prisma.$transaction(
+            testCases.map((testCase) => {
+                return prisma.testCaseResult.update({
+                    where: {
+                        submissionId_testCaseId: {
+                            submissionId,
+                            testCaseId: testCase.id,
+                        },
+                    },
+                    data: {
+                        status: "INTERNAL_ERROR",
+                        stderr: "Batch submission error",
+                    },
+                });
+            })
+        );
+
+        // Also mark the submission as failed
+        await prisma.submission.update({
+            where: { id: submissionId },
+            data: {
+                status: "INTERNAL_ERROR",
+            },
+        });
     }
 };
 
@@ -333,6 +486,7 @@ const languages = [
 module.exports = {
     judgeTestCase,
     processAllTestCases,
+    processAllTestCases_batched,
     mapJudgeStatus,
     languages
 };
